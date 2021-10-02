@@ -12,7 +12,20 @@ export default interface Plants {
         state?: string,
         time?: number,
         water?: number,
+        hasSeeds?: boolean,
         hasFertilizer?: boolean,
         isHarvestable?: boolean
     }
 };
+
+/*
+export default interface UpdateParams {
+    id?: string;
+    state?: string,
+    object?: string,
+    time?: number,
+    water?: number,
+    hasSeeds?: boolean, 
+    hasFertilizer?: boolean,
+    isHarvestable?: boolean
+} */

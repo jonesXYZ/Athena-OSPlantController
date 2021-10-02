@@ -1,20 +1,9 @@
 import * as alt from  'alt-server';
 import { BlipController } from '../../server/systems/blip';
 import { SYSTEM_EVENTS } from '../../shared/enums/system';
-import { updatePlants } from './database';
+import { loadPlants, updatePlants } from './database';
+import { blipSettings, defaultSettings } from './settings';
 
-const defaultSettings = {
-    plantSystemEnabled: true,
-    plantUpdateInterval: 5000,
-}
-
-const blipSettings = {
-    sprite: 620,
-    color: 2,
-    scale: 1,
-    shortRange: true,
-    text: 'Weed-Plant Spot'
-}
 /** 
  * An Array All the valid plant placing spots are going here.
  * @type {alt.Vector3} 
@@ -24,9 +13,11 @@ const plantSpots: alt.Vector3[] = [
     {"x":-1625.6290283203125,"y":3165.891357421875,"z":29.933713912963867} as alt.Vector3,
 ];
 
-alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, loadAllPlants);
-function loadAllPlants() {
+alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, setPlantInterval);
+function setPlantInterval() {
     if(!defaultSettings.plantSystemEnabled) return false;
+
+    loadPlants();
 
     alt.setInterval(() => {
         updatePlants();
@@ -43,6 +34,5 @@ function loadAllPlants() {
             pos: plantSpots[index],
         });
     });
-
     return true;
 };
