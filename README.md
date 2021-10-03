@@ -1,77 +1,139 @@
-# Plantsystem for Athena Framework (GTA V) by Der Lord!
+# Plantsystem v2 for Athena Framework (GTA V) by Der Lord!
 
 ![unknown](https://user-images.githubusercontent.com/82890183/131876685-13775cce-d8ee-4eb5-b95e-b3ad8520a3cf.png)
 
+Good evening guys, i've decided to rewrite the plugins codebase as a whole. Thanks especially to Stuyk for pointing out about objects.
+
+So here we go again :)
+
 # Features:
-* Add unlimited placing spots for your players where they can plant.
-* Enable/Disable Blip System, make it harder to find all your placing spots.
-* Place new pots easily per TOOLBAR & Harvest them by TOOLBAR as well.
-* Fertilizer & Water your plants per TOOLBAR
-* Scenario for gardening, watering & fertilizing the plants.
-* Random output of weed buds which can be easily configured inside of the source code.
-* Plants are database stored
-
-![image](https://user-images.githubusercontent.com/82890183/132117836-261d8154-f152-4265-9384-08716d8d56c0.png)
-
-![image](https://user-images.githubusercontent.com/82890183/132117854-f6dd5c5a-a949-4f77-8718-097c88131704.png)
+* Now fully translateable in your native language
+* Now based on Athena's InteractionController
+* Now you can still plant weed pots by Toolbar but now for fertilizing, watering and so on you'll only need to have stuff in inventory.
+* Now with maximum Plant support for each player individually
+* Customize scenarios & the time for each.
+* Customize the updateInterval & also the states of the plants.
+* Customize the range to a spot players can have
+* Customizie the outcome of the plant harvesting (only tried randomized outcome there so far)
+* Customize the water loss per minute .. and a lot more.
 
 ### Plantsystem - SETUP
 * This is a serverside plugin! It has to be added in your local athena repository here: (/src/core/plugins/Plantsystem)
 * Go to your .env file inside of your local Athena repository and add "MONGO_COLLECTIONS=plants" without the quotes.
 * Configuration Options can be found below.
+* Setup should be pretty much the same actually.
 
-## Import.ts (src/core/plugins/import.ts)
+### Default Settings
+
+You can always find the default settings for this plugin here.
 ```typescript
-    './Plantsystem/index',
-    './Plantsystem/interface',
-    './Plantsystem/items',
-```
-
-
-## interface.ts
-```typescript
-const smallPlant = 'bkr_prop_weed_01_small_01a';
-const mediumPlant = 'bkr_prop_weed_med_01a';
-const bigPlant = 'bkr_prop_weed_lrg_01a';
-
-const harvestDuration = 5000; // Duration for Harvesting in MS
-
-const fertilizeDuration = 5000; // Duration for Fertilizing in MS
-const fertilizerRemoveTime = 30; // How many minutes will the fertilizer remove?
-
-const wateringDuration = 5000; // Duration for Watering in MS
-const minRequiredWater = 50; // How much water is minimum needed for the plant to grow?
-const waterLossPerMinute = 5;
-
-const minBuds = 25; // Min output as weedbuds from harvesting
-const maxBuds = 50; // Maximum output as weedbuds from harvesting
-```
-
-
-## index.ts
-```typescript
-
-const plantInterval = 1000; // How long will it take to remove a minute in ms? default: 60000
-const plantSystemEnabled = true; // If enabled update interval will start on bootup of Athena. default: true
-
-// Add whatever spots you like here (Press F1 with administrative rights ingame to get Pos from the alt:V Dev Console)
-// #default spots 3, add more if you need
-const validPlantPlaceSpots = [
-    { "x": -2006.942138671875, "y": 2568.26953125, "z": 2.7962563037872314 },
-    { "x": -2010.500732421875, "y": 2568.917236328125, "z": 2.7646090984344482 },
-    { "x": -2012.62451171875, "y": 2565.571044921875, "z": 2.746884346008301 },
-    { "x": -2007.74267578125, "y": 2564.00341796875, "z": 2.6880717277526855 },
-    { "x": -2020.5887451171875, "y": 2566.855224609375, "z": 2.6964898109436035 },
-    { "x": -2020.66455078125, "y": 2572.015625, "z": 2.710820198059082 },
-    { "x": -2020.5101318359375, "y": 2577.8818359375, "z": 2.778646469116211 },
-    { "x": -2016.6363525390625, "y": 2578.458251953125, "z": 3.48949933052063 },
-    { "x": -2011.7757568359375, "y": 2578.625732421875, "z": 3.5605852603912354 },
-    { "x": -2004.8231201171875, "y": 2575.834716796875, "z": 2.8564610481262207 }
+import * as alt from 'alt-server';
+/**
+ * An Array all the valid plant placing spots are going here.
+ * Just press F1 Ingame with some administrative permissions, then press F8 and copy here and add "as alt.Vector3"
+ * @type {alt.Vector3}
+ * @memberof main
+ */
+export const plantSpots: alt.Vector3[] = [
+	{ x: -1625.6290283203125, y: 3165.891357421875, z: 29.933713912963867 } as alt.Vector3
+	// { x: 0, y: 0, z: 0 } as alt.Vector3, .. More Positions.
 ];
 
-const distanceToValidSpot: number = 5; // Distance the player can have to a valid spot. default: 5
-const appendBlips: any = true; // Blips enabled? default: true
-``` 
+// Translate whatever you need here to your native language
 
+export enum Translations {
+	STATE = 'State:',
+	WATER = 'Water:',
+	TIME = 'Time:',
+	FERTILIZER = 'Fertilizer:',
+	HARVESTABLE = 'Harvestable:',
 
-![image](https://user-images.githubusercontent.com/82890183/132117657-ace30926-9e87-4d04-bf47-2d55aef9a00b.png)
+	NO_SEEDS_IN_INVENTORY = 'You do not have any weedseeds in your inventory',
+	NO_FERTILIZER_IN_INVENTORY = 'You do not have any plant fertilizer in your inventory',
+	NO_PLANTWATER_IN_INVENTORY = 'You do not have any plant water in your inventory',
+
+	NOT_IN_RANGE_OF_SPOT = 'You are not in the range of a valid planting spot',
+	NOT_ALLOWED_TO_INTERACT = 'You are not allowed to interact with this plant.',
+	PLANT_SUCCESSFULLY_CREATED = 'Successfully created a plant.',
+
+	INTERACTION_PLACESEEDS = 'Place Weedseeds',
+	INTERACTION_FERTILIZE = 'Fertilize this plant',
+	INTERACTION_WATER = 'Water this plant',
+	INTERACTION_HARVEST = 'Harvest this plant',
+	waitTillWateringFinished = "Wait until you've finished the process of watering"
+}
+
+// Settings for the main.ts - file
+export const defaultSettings = {
+	plantSystemEnabled: true, // is the PlantSystem enabled? default: true
+	plantUpdateInterval: 1000, // updateInterval for all Plants? default: 60000 (1 Minute)
+	createBlips: true // will blips be created on the bootup of the Athena Framework? Maybe you want to make it harder to find some spots.
+};
+
+export const blipSettings = {
+	sprite: 469, // Sprite of the Spot Blips
+	color: 2, // Color of the Spot Blips
+	scale: 1, // Scale of the Blips
+	shortRange: true, // ShortRange - N/A idk have to look alt:V imagine insane emoji here. kekw.
+	text: 'Weed-Plant Spot' // Text for all generated Blips?
+};
+
+// Settings for the database.ts - file
+export const dbSettings = {
+	logsEnabled: true, // logsystem of this plantsystem enabled? default: false
+	useItems: true, // will player need items to place, fertilize, water plants? default: true - i'd suggest to keep this.
+
+	allowEveryoneToInteract: false, // can everyone harvest plant of anyone? default: false,
+	plantLimit: true, // plantLimit for players enabled? default: true
+	maximumAllowedPlants: 10, // maximumAllowedPlants for a player? default: 10
+
+	plantRequiredWaterToGrowh: 20, // Minium amount of water needed for the plant to grow. default: 20 (%)
+	plantWaterLossPerMinute: 0.25, // How much Water will this plant remove per minute?
+	destroyPlantsWithLowWater: false, // Will plants which result in zero water before finished be destroyed? Don't use for now. Not integrated.
+
+	beginngStateText: 'Beginning...', // Text right after placing a pot.
+	plantBeginningState: 60, // This does not matter too much tbh.
+
+	mediumStateText: 'Growth...', // Text for the mediumState.
+	plantMediumState: 30, // At what state should the plant switch into "mediumState"? default: 30 (minutes).
+
+	endStateText: 'End of growth...', // Text for the endState.
+	plantEndState: 15, // At what state should the plant switch into "endState"? default: 15 (minutes).
+
+	harvestableText: 'Harvestable',
+
+	seedPlacingTime: 5000, // Time it takes to place a seed
+	seedPlacingScenario: 'WORLD_HUMAN_GARDENER_PLANT', // scenario for placing Plants
+
+	wateringTime: 5000, // Time it takes to water a plant
+	wateringScenario: 'WORLD_HUMAN_GARDENER_LEAF_BLOWER', // scenario for watering Plants
+
+	fertilizeTime: 5000, // Time it takes to fertilize a plant
+	fertilizeScenario: 'WORLD_HUMAN_GARDENER_LEAF_BLOWER', // scenario for fertilizing Plants
+
+	harvestTime: 5000, // Time it takes to harvest plant
+	harvestScenario: 'WORLD_HUMAN_GARDENER_PLANT', // scenario for harvesting Plants
+	randomizeHarvestOutcome: true,
+	minOutcome: 20,
+	maxOutcome: 40,
+
+	rangeToSpot: 20 // how far can a player be away from a plant spot and still plant a pot?
+};
+
+// DO NOT CHANGE THESE IF YOU DONT KNOW WHAT YOU ARE DOING HERE!
+export const db_plantObjects = {
+	small: 'bkr_prop_weed_01_small_01a',
+	medium: 'bkr_prop_weed_med_01a',
+	large: 'bkr_prop_weed_lrg_01a'
+};
+```
+
+### Known Issues
+* None for now.
+
+If you want to contribute to Athena's Plantsystem Plugin feel free to open an issue (for Feature Request also) or a Pull Request if you think you fixed a bug or added some new features.
+
+If you want to leave some feedback, feel free to do so in the Athena-Framework Forums. You can also point out bugs there if you don't know how to create a git issue.
+
+https://forum.athenaframework.com/
+ 
