@@ -1,100 +1,87 @@
-/************************************************************
- *      PLANT-System for ATHENA-Framework by Der Lord!      *
- * Explanations can be found in this across the source code *      
- ************************************************************/
+/**************************************************************************
+ * The most configurable PlantSystem for the Athena Framework by Stuyk.   *
+ * https://github.com/Stuyk/altv-athena                                   *
+ * ---------------------------------------------------------------------- *
+ * Written by Der Lord!                                                   *
+ * Happy Hacktober! Support some OpenSource Projects you like.            *
+ * https://hacktoberfest.digitalocean.com/                                *
+ * ---------------------------------------------------------------------- *
+ * Feel free to change whatever you need or dont want.                    *
+ * Leave some feedback in the forums if you want to! I'd appreciate it.   *
+ * Also feel free to open a PR / issue on my GitHub if you need something *
+ * https://github.com/Booster1212/AthenaPlantsystem                       *
+ **************************************************************************/
 import { ITEM_TYPE } from '../../shared/enums/itemTypes';
-import { Item } from "../../shared/interfaces/Item";
+import { Item } from '../../shared/interfaces/Item';
 import { appendToItemRegistry } from '../../shared/items/itemRegistry';
 import { deepCloneObject } from '../../shared/utility/deepCopy';
 
 const weedPotItem: Item = {
-    name: 'Weed Pot',
-    description: 'DEBUG: Change me! :( - I am used to plant a WeedPot.',
-    icon: 'crate',
-    slot: 0,
-    quantity: 15,
-    behavior:
-        ITEM_TYPE.CAN_DROP |
-        ITEM_TYPE.CAN_STACK |
-        ITEM_TYPE.CONSUMABLE |
-        ITEM_TYPE.IS_TOOLBAR,
-    data: {
-        event: 'Plantsystem:PlacePot',
-    }
-}
+	name: 'Weedpot',
+	description: 'DEBUG: Change me! :( - I am used to plant a WeedPot.',
+	icon: 'crate',
+	slot: 0,
+	quantity: 15,
+	behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_STACK | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.CONSUMABLE,
+	data: {
+		event: 'PlantSystem:Serverside:PlantPot'
+	}
+};
 const registerWeedPot: Item = deepCloneObject<Item>(weedPotItem);
 appendToItemRegistry(registerWeedPot);
-const weedBudsItem: Item = {
-    name: 'Buds',
-    description: 'DEBUG: Change me :( - I am the return of harvesting a WeedPot.',
-    icon: 'crate',
-    slot: 0,
-    quantity: 0,
-    behavior:
-        ITEM_TYPE.CAN_DROP |
-        ITEM_TYPE.CAN_STACK |
-        ITEM_TYPE.CONSUMABLE |
-        ITEM_TYPE.IS_TOOLBAR,
-    data: {
-        // None for now.
-    }
-}
-const registerWeedBuds: Item = deepCloneObject<Item>(weedBudsItem);
-appendToItemRegistry(registerWeedBuds);
 
-const secateursItem: Item = {
-    name: 'secateurs',
-    description: 'DEBUG: Change me :( - I am your little harvest helper to harvest WeedPots.',
-    icon: 'crate',
-    slot: 0,
-    quantity: 100,
-    behavior:
-        ITEM_TYPE.CAN_DROP |
-        ITEM_TYPE.CAN_STACK |
-        ITEM_TYPE.CONSUMABLE |
-        ITEM_TYPE.IS_TOOLBAR,
-    data: {
-        event: 'Plantsystem:HarvestPot',
-    }
-}
-const registerSecateurs: Item = deepCloneObject<Item>(secateursItem);
-appendToItemRegistry(registerSecateurs);
+const weedSeedsItem: Item = {
+	name: 'Weedseeds',
+	description: 'DEBUG: Change me! :( - I am used to insert seeds into a Weedpot.',
+	icon: 'crate',
+	slot: 0,
+	quantity: 15,
+	behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_STACK | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.CONSUMABLE,
+	data: {
+		/* */
+	}
+};
+const registerWeedSeeds: Item = deepCloneObject<Item>(weedSeedsItem);
+appendToItemRegistry(registerWeedSeeds);
 
-const plantFertilizerItem: Item = {
-    name: 'Pot Fertilizer',
-    description: 'DEBUGItem.. Change me - I am used to fertilize WeedPots.',
-    icon: 'crate',
-    slot: 0,
-    quantity: 25,
-    behavior:
-        ITEM_TYPE.CAN_DROP |
-        ITEM_TYPE.CAN_STACK |
-        ITEM_TYPE.CONSUMABLE |
-        ITEM_TYPE.IS_TOOLBAR,
-    data: {
-        event: 'Plantsystem:FertilizePot',
-        amount: 25
-    }
-}
-const registerPlantFertilizer: Item = deepCloneObject<Item>(plantFertilizerItem);
-appendToItemRegistry(registerPlantFertilizer);
+const weedFertilizerItem: Item = {
+	name: 'Weedfertilizer',
+	description: 'DEBUG: Change me! :( - I am used to fertilize a Weedplant.',
+	icon: 'crate',
+	slot: 0,
+	quantity: 15,
+	behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_STACK | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.IS_TOOLBAR,
+	data: {
+		/* */
+	}
+};
+const registerWeedFertilizer: Item = deepCloneObject<Item>(weedFertilizerItem);
+appendToItemRegistry(registerWeedFertilizer);
 
 const plantWaterItem: Item = {
-    name: 'Plantwater',
-    description: 'DEBUGItem.. Change me - I am used to water WeedPots.',
-    icon: 'crate',
-    slot: 0,
-    quantity: 25,
-    behavior:
-        ITEM_TYPE.CAN_DROP |
-        ITEM_TYPE.CAN_STACK |
-        ITEM_TYPE.CONSUMABLE |
-        ITEM_TYPE.IS_TOOLBAR,
-    data: {
-        event: 'Plantsystem:WaterPot',
-        amount: 25
-    }
-}
+	name: 'Plantwater',
+	description: 'DEBUG: Change me! :( - I am used to insert seeds into a Weedpot.',
+	icon: 'crate',
+	slot: 0,
+	quantity: 15,
+	behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_STACK | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.IS_TOOLBAR,
+	data: {
+		waterAmount: 25
+	}
+};
 const registerPlantWater: Item = deepCloneObject<Item>(plantWaterItem);
 appendToItemRegistry(registerPlantWater);
 
+const plantWeedBudsItem: Item = {
+	name: 'Weedbuds',
+	description: 'DEBUG: Change me! :( - I am the outcome of harvesting a plant.',
+	icon: 'crate',
+	slot: 0,
+	quantity: 15,
+	behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_STACK | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.IS_TOOLBAR,
+	data: {
+		amount: 20
+	}
+};
+const registerWeedBuds: Item = deepCloneObject<Item>(plantWeedBudsItem);
+appendToItemRegistry(registerWeedBuds);
