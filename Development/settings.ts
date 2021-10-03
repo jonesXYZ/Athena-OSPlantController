@@ -1,32 +1,16 @@
-# Plantsystem v2 for Athena Framework (GTA V) by Der Lord!
-
-![unknown](https://user-images.githubusercontent.com/82890183/131876685-13775cce-d8ee-4eb5-b95e-b3ad8520a3cf.png)
-
-Good evening guys, i've decided to rewrite the plugins codebase as a whole. Thanks especially to Stuyk for pointing out about objects.
-
-So here we go again :)
-
-# Features:
-* Now fully translateable in your native language
-* Now based on Athena's InteractionController
-* Now you can still plant weed pots by Toolbar but now for fertilizing, watering and so on you'll only need to have stuff in inventory.
-* Now with maximum Plant support for each player individually
-* Customize scenarios & the time for each.
-* Customize the updateInterval & also the states of the plants.
-* Customize the range to a spot players can have
-* Customizie the outcome of the plant harvesting (only tried randomized outcome there so far)
-* Customize the water loss per minute .. and a lot more.
-
-### Plantsystem - SETUP
-* This is a serverside plugin! It has to be added in your local athena repository here: (/src/core/plugins/Plantsystem)
-* Go to your .env file inside of your local Athena repository and add "MONGO_COLLECTIONS=plants" without the quotes.
-* Configuration Options can be found below.
-* Setup should be pretty much the same actually.
-
-### Default Settings
-
-You can always find the default settings for this plugin here.
-```typescript
+/**************************************************************************
+ * The most configurable PlantSystem for the Athena Framework by Stuyk.   *
+ * https://github.com/Stuyk/altv-athena                                   *
+ * ---------------------------------------------------------------------- *
+ * Written by Der Lord!                                                   *
+ * Happy Hacktober! Support some OpenSource Projects you like.            *
+ * https://hacktoberfest.digitalocean.com/                                *
+ * ---------------------------------------------------------------------- *
+ * Feel free to change whatever you need or dont want.                    *
+ * Leave some feedback in the forums if you want to! I'd appreciate it.   *
+ * Also feel free to open a PR / issue on my GitHub if you need something *
+ * https://github.com/Booster1212/AthenaPlantsystem                       *
+ **************************************************************************/
 import * as alt from 'alt-server';
 /**
  * An Array all the valid plant placing spots are going here.
@@ -66,7 +50,7 @@ export enum Translations {
 // Settings for the main.ts - file
 export const defaultSettings = {
 	plantSystemEnabled: true, // is the PlantSystem enabled? default: true
-	plantUpdateInterval: 1000, // updateInterval for all Plants? default: 60000 (1 Minute)
+	plantUpdateInterval: 60000, // updateInterval for all Plants? default: 60000 (1 Minute)
 	createBlips: true // will blips be created on the bootup of the Athena Framework? Maybe you want to make it harder to find some spots.
 };
 
@@ -126,14 +110,9 @@ export const db_plantObjects = {
 	medium: 'bkr_prop_weed_med_01a',
 	large: 'bkr_prop_weed_lrg_01a'
 };
-```
 
-### Known Issues
-* None for now.
-
-If you want to contribute to Athena's Plantsystem Plugin feel free to open an issue (for Feature Request also) or a Pull Request if you think you fixed a bug or added some new features.
-
-If you want to leave some feedback, feel free to do so in the Athena-Framework Forums. You can also point out bugs there if you don't know how to create a git issue.
-
-https://forum.athenaframework.com/
- 
+export function getRandomInt(min: number, max: number) {
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	return Math.floor(Math.random() * (max - min)) + min;
+}
