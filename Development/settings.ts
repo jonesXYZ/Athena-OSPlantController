@@ -26,25 +26,25 @@ export const plantSpots: alt.Vector3[] = [
 // Translate whatever you need here to your native language
 
 export enum Translations {
-	STATE = 'State:',
-	WATER = 'Water:',
-	TIME = 'Time:',
-	FERTILIZER = 'Fertilizer:',
-	HARVESTABLE = 'Harvestable:',
+	STATE = 'Status:',
+	WATER = 'Wasser:',
+	TIME = 'Zeit:',
+	FERTILIZER = 'Dünger:',
+	HARVESTABLE = 'Erntebereit:',
 
-	NO_SEEDS_IN_INVENTORY = 'You do not have any weedseeds in your inventory',
-	NO_FERTILIZER_IN_INVENTORY = 'You do not have any plant fertilizer in your inventory',
-	NO_PLANTWATER_IN_INVENTORY = 'You do not have any plant water in your inventory',
+	NO_SEEDS_IN_INVENTORY = 'Du hast keine Pflanzensamen in deinem Inventar!',
+	NO_FERTILIZER_IN_INVENTORY = 'Du hast keinen Pflanzendünger in deinem Inventar!',
+	NO_PLANTWATER_IN_INVENTORY = 'Du hast kein Pflanzwasser in deinem Inventar!',
 
-	NOT_IN_RANGE_OF_SPOT = 'You are not in the range of a valid planting spot',
-	NOT_ALLOWED_TO_INTERACT = 'You are not allowed to interact with this plant.',
-	PLANT_SUCCESSFULLY_CREATED = 'Successfully created a plant.',
+	NOT_IN_RANGE_OF_SPOT = 'Du bist nicht im Bereich eines geeigneten Pflanzspots.',
+	NOT_ALLOWED_TO_INTERACT = 'Es ist Dir nicht erlaubt mit dieser Pflanze zu interagieren.',
+	PLANT_SUCCESSFULLY_CREATED = 'Die Pflanze wurde erfolgreich eingepflanzt.',
 
-	INTERACTION_PLACESEEDS = 'Place Weedseeds',
-	INTERACTION_FERTILIZE = 'Fertilize this plant',
-	INTERACTION_WATER = 'Water this plant',
-	INTERACTION_HARVEST = 'Harvest this plant',
-	waitTillWateringFinished = "Wait until you've finished the process of watering"
+	INTERACTION_PLACESEEDS = 'Samen säen',
+	INTERACTION_FERTILIZE = 'Pflanze düngen',
+	INTERACTION_WATER = 'Pflanze wässern',
+	INTERACTION_HARVEST = 'Pflanze ernten',
+	waitTillWateringFinished = "Warte, bis Du den Bewässerungsvorgang abgeschlossen hast!"
 }
 
 // Settings for the main.ts - file

@@ -19,12 +19,12 @@ import ChatController from '../../server/systems/chat';
 import { PERMISSIONS } from '../../shared/flags/PermissionFlags';
 import { playerFuncs } from '../../server/extensions/Player';
 import { getVectorInFrontOfPlayer } from '../../server/utility/vector';
-import { ObjectController } from '../../server/systems/object';
-import { TextLabelController } from '../../server/systems/textlabel';
 import { InteractionController } from '../../server/systems/interaction';
 import { dbSettings, db_plantObjects, getRandomInt, Translations } from './settings';
 import { getFromRegistry } from '../../shared/items/itemRegistry';
 import { resyncPlayerInventory } from './events';
+import { ServerObjectController } from '../../server/streamers/object';
+import { ServerTextLabelController } from '../../server/streamers/textlabel';
 
 ChatController.addCommand('testPlant', '/testPlant - testing this glorious plantsystem without items!', PERMISSIONS.ADMIN, buildPlant);
 
@@ -64,13 +64,13 @@ export async function buildPlant(player: alt.Player) {
 	}
 
 	databasePlants.data.state = dbSettings.beginngStateText;
-	ObjectController.append({
+	ServerObjectController.append({
 		pos: { x: forwardVector.x, y: forwardVector.y, z: forwardVector.z - 1 },
 		model: db_plantObjects.small,
 		uid: databasePlants._id.toString()
 	});
 
-	TextLabelController.append({
+	ServerTextLabelController.append({
 		pos: { x: forwardVector.x, y: forwardVector.y, z: forwardVector.z },
 		data: `${Translations.STATE} ~g~${databasePlants.data.state}~n~~w~${Translations.TIME} ~g~${databasePlants.data.time}~n~~w~${Translations.WATER} ~g~${databasePlants.data.water}%~n~~w~${Translations.FERTILIZER} ~g~${databasePlants.data.hasFertilizer}`,
 		uid: `Plant-${databasePlants._id.toString()}`
@@ -96,8 +96,8 @@ export async function buildPlant(player: alt.Player) {
 					playerFuncs.emit.notification(player, Translations.NO_SEEDS_IN_INVENTORY);
 					return;
 				} else if (seedsInInventory) {
-					player.data.inventory[seedsInInventory.tab][seedsInInventory.index].quantity -= 1;
-					if (player.data.inventory[seedsInInventory.tab][seedsInInventory.index].quantity <= 0) {
+					player.data.inventory[seedsInInventory.index].quantity -= 1;
+					if (player.data.inventory[seedsInInventory.index].quantity <= 0) {
 						playerFuncs.inventory.findAndRemove(player, seeds.name);
 					}
 				}
@@ -108,7 +108,7 @@ export async function buildPlant(player: alt.Player) {
 				alt.emit(
 					'PlantSystem:Serverside:PlaceSeeds',
 					databasePlants._id.toString(),
-					placingInteraction.getType(),
+					placingInteraction.type,
 					placingInteraction.getIdentifier()
 				);
 			}, dbSettings.seedPlacingTime);
@@ -149,7 +149,7 @@ export async function loadPlants() {
 							'PlantSystem:Serverside:PlaceSeeds',
 							plant._id.toString(),
 							placingInteraction.pos,
-							placingInteraction.getType(),
+							placingInteraction.type,
 							placingInteraction.getIdentifier()
 						);
 					}, dbSettings.seedPlacingTime);
@@ -181,8 +181,8 @@ export async function loadPlants() {
 							playerFuncs.emit.notification(player, Translations.NO_FERTILIZER_IN_INVENTORY);
 							return;
 						} else if (fertilizerInInventory) {
-							player.data.inventory[fertilizerInInventory.tab][fertilizerInInventory.index].quantity -= 1;
-							if (player.data.inventory[fertilizerInInventory.tab][fertilizerInInventory.index].quantity <= 0) {
+							player.data.inventory[fertilizerInInventory.index].quantity -= 1;
+							if (player.data.inventory[fertilizerInInventory.index].quantity <= 0) {
 								playerFuncs.inventory.findAndRemove(player, fertilizer.name);
 							}
 						}
@@ -203,7 +203,7 @@ export async function loadPlants() {
 							'PlantSystem:Serverside:Fertilize',
 							plant._id.toString(),
 							fertilizerInteraction.pos,
-							fertilizerInteraction.getType(),
+							fertilizerInteraction.type,
 							fertilizerInteraction.getIdentifier()
 						);
 					}, dbSettings.fertilizeTime);
@@ -228,8 +228,8 @@ export async function loadPlants() {
 
 		if (plant.data.time <= dbSettings.plantMediumState && plant.data.time >= dbSettings.plantEndState) {
 			alt.setTimeout(() => {
-				ObjectController.remove(plant._id.toString());
-				ObjectController.append({
+				ServerObjectController.remove(plant._id.toString());
+				ServerObjectController.append({
 					model: db_plantObjects.medium,
 					pos: plant.position,
 					uid: plant._id.toString()
@@ -243,8 +243,8 @@ export async function loadPlants() {
 
 		if (plant.data.time <= dbSettings.plantEndState && plant.data.time >= 0) {
 			alt.setTimeout(() => {
-				ObjectController.remove(plant._id.toString());
-				ObjectController.append({
+				ServerObjectController.remove(plant._id.toString());
+				ServerObjectController.append({
 					model: db_plantObjects.large,
 					pos: plant.position,
 					uid: plant._id.toString()
@@ -256,7 +256,7 @@ export async function loadPlants() {
 			}, 250);
 		}
 		if (plant.data.time > 0) {
-			TextLabelController.append({
+			ServerTextLabelController.append({
 				pos: { x: plant.position.x, y: plant.position.y, z: plant.position.z },
 				data: `${Translations.STATE} ~g~${plant.data.state}~n~~w~${Translations.TIME} ~g~${plant.data.time}~n~~w~${Translations.WATER} ~g~${plant.data.water}%~n~~w~${Translations.FERTILIZER} ~g~${plant.data.hasFertilizer}`,
 				uid: `Plant-${plant._id.toString()}`
@@ -266,8 +266,8 @@ export async function loadPlants() {
 		if (plant.data.time == 0) {
 			plant.data.state = dbSettings.harvestableText;
 			alt.setTimeout(() => {
-				TextLabelController.remove(`Plant-${plant._id.toString()}`);
-				TextLabelController.append({
+				ServerTextLabelController.remove(`Plant-${plant._id.toString()}`);
+				ServerTextLabelController.append({
 					pos: {
 						x: plant.position.x,
 						y: plant.position.y,
@@ -279,7 +279,7 @@ export async function loadPlants() {
 			}, 250);
 		}
 
-		ObjectController.append({
+		ServerObjectController.append({
 			model: plant.data.object,
 			pos: plant.position,
 			uid: plant._id.toString()
@@ -300,8 +300,8 @@ export async function updatePlants() {
 	(await allDatabasePlants).forEach(async (plant) => {
 		if (!plant.data.hasSeeds || !plant.data.hasFertilizer || plant.data.water < dbSettings.plantRequiredWaterToGrowh) return;
 
-		TextLabelController.remove(`Plant-${plant._id.toString()}`);
-		TextLabelController.append({
+		ServerTextLabelController.remove(`Plant-${plant._id.toString()}`);
+		ServerTextLabelController.append({
 			pos: plant.position,
 			data: `${Translations.STATE} ~g~${plant.data.state}~n~~w~${Translations.TIME} ~g~${plant.data.time}~n~~w~${Translations.WATER} ~g~${plant.data.water}%~n~~w~${Translations.FERTILIZER} ~g~${plant.data.hasFertilizer}`,
 			uid: `Plant-${plant._id.toString()}`
@@ -311,8 +311,8 @@ export async function updatePlants() {
 		if (plant.data.time == dbSettings.plantMediumState) {
 			alt.setTimeout(() => {
 				updateSinglePlant(plant._id, undefined, undefined, undefined, undefined, dbSettings.mediumStateText, undefined, undefined);
-				ObjectController.remove(plant._id.toString());
-				ObjectController.append({
+				ServerObjectController.remove(plant._id.toString());
+				ServerObjectController.append({
 					model: db_plantObjects.medium,
 					pos: plant.position,
 					uid: plant._id.toString()
@@ -326,8 +326,8 @@ export async function updatePlants() {
 		if (plant.data.time == dbSettings.plantEndState) {
 			alt.setTimeout(() => {
 				updateSinglePlant(plant._id, undefined, undefined, undefined, undefined, dbSettings.endStateText, undefined, undefined);
-				ObjectController.remove(plant._id.toString());
-				ObjectController.append({
+				ServerObjectController.remove(plant._id.toString());
+				ServerObjectController.append({
 					model: db_plantObjects.large,
 					pos: plant.position,
 					uid: plant._id.toString()
@@ -372,8 +372,8 @@ export async function updatePlants() {
 				'plants'
 			);
 			alt.setTimeout(() => {
-				TextLabelController.remove(`Plant-${plant._id.toString()}`);
-				TextLabelController.append({
+				ServerTextLabelController.remove(`Plant-${plant._id.toString()}`);
+				ServerTextLabelController.append({
 					pos: plant.position,
 					data: `${Translations.STATE} ~g~${plant.data.state}`,
 					uid: `Plant-${plant._id.toString()}`
@@ -388,7 +388,7 @@ export async function updatePlants() {
 							'PlantSystem:Serverside:HarvestPlant',
 							player,
 							plant._id.toString(),
-							harvestInteraction.getType(),
+							harvestInteraction.type,
 							harvestInteraction.getIdentifier()
 						);
 					}

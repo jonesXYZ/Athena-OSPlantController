@@ -15,8 +15,9 @@ import Database from '@stuyk/ezmongodb';
 import * as alt from 'alt-server';
 import { playerFuncs } from '../../server/extensions/Player';
 import { InteractionController } from '../../server/systems/interaction';
-import { ObjectController } from '../../server/systems/object';
-import { TextLabelController } from '../../server/systems/textlabel';
+// import { ObjectController } from '../../server/systems/object';
+// import { TextLabelController } from '../../server/systems/textlabel';
+import { PLAYER_SYNCED_META } from '../../shared/enums/playerSynced';
 import { getFromRegistry } from '../../shared/items/itemRegistry';
 
 import { buildPlant, removePlant, updateSinglePlant } from './database';
