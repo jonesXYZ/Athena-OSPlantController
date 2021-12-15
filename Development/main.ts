@@ -19,12 +19,21 @@ import { ServerBlipController } from '../../server/systems/blip';
 import { SYSTEM_EVENTS } from '../../shared/enums/system';
 import { loadPlants, updatePlants } from './database';
 import { blipSettings, defaultSettings, plantSpots } from './settings';
+import { PluginSystem } from '../../server/systems/plugins';
+import Database from '@stuyk/ezmongodb';
 
 alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, setPlantInterval);
+
+const ATHENA_PLANTSYSTEM = 'Athena Plantsystem';
+
+PluginSystem.registerPlugin(ATHENA_PLANTSYSTEM, () => {
+    alt.log(`~lg~${ATHENA_PLANTSYSTEM} was successfully loaded`);
+	loadPlants();
+	Database.createCollection('plants');
+});
+
 function setPlantInterval() {
 	if (!defaultSettings.plantSystemEnabled) return false;
-
-	loadPlants();
 
 	alt.setInterval(() => {
 		updatePlants();

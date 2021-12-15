@@ -207,7 +207,7 @@ export async function loadPlants() {
 				}
 			});
 		} else if (plant.data.water >= 0 && plant.data.water < 100) {
-			const waterInteraction = InteractionController.add({
+			InteractionController.add({
 				position: {
 					x: plant.position.x,
 					y: plant.position.y,
@@ -218,7 +218,6 @@ export async function loadPlants() {
 				type: `WeedPlant-Interaction`,
 				callback: (player: alt.Player) => {
 					alt.emit('PlantSystem:Serverside:WaterPlant', player, plant._id.toString());
-					/* */
 				}
 			});
 		}
@@ -297,12 +296,14 @@ export async function updatePlants() {
 	(await allDatabasePlants).forEach(async (plant) => {
 		if (!plant.data.hasSeeds || !plant.data.hasFertilizer || plant.data.water < dbSettings.plantRequiredWaterToGrowh) return;
 
-		ServerTextLabelController.remove(`Plant-${plant._id.toString()}`);
-		ServerTextLabelController.append({
-			pos: plant.position,
-			data: `${Translations.STATE} ~g~${plant.data.state}~n~~w~${Translations.TIME} ~g~${plant.data.time}~n~~w~${Translations.WATER} ~g~${plant.data.water}%~n~~w~${Translations.FERTILIZER} ~g~${plant.data.hasFertilizer}`,
-			uid: `Plant-${plant._id.toString()}`
-		});
+		alt.setTimeout(() => {
+			ServerTextLabelController.remove(`Plant-${plant._id.toString()}`);
+			ServerTextLabelController.append({
+				pos: plant.position,
+				data: `${Translations.STATE} ~g~${plant.data.state}~n~~w~${Translations.TIME} ~g~${plant.data.time}~n~~w~${Translations.WATER} ~g~${plant.data.water}%~n~~w~${Translations.FERTILIZER} ~g~${plant.data.hasFertilizer}`,
+				uid: `Plant-${plant._id.toString()}`
+			});
+		}, 500);
 
 		if (plant.data.water >= 100) plant.data.water = 100;
 		if (plant.data.time == dbSettings.plantMediumState) {
@@ -433,6 +434,14 @@ export async function updateSinglePlant(
 		},
 		'plants'
 	);
+	alt.setTimeout(() => {
+		ServerTextLabelController.remove(`Plant-${plant._id.toString()}`);
+		ServerTextLabelController.append({
+			pos: plant.position,
+			data: `${Translations.STATE} ~g~${plant.data.state}~n~~w~${Translations.TIME} ~g~${plant.data.time}~n~~w~${Translations.WATER} ~g~${plant.data.water}%~n~~w~${Translations.FERTILIZER} ~g~${plant.data.hasFertilizer}`,
+			uid: `Plant-${plant._id.toString()}`
+		});
+	}, 250);
 
 	if (dbSettings.logsEnabled) {
 		alt.log(`Updating Plant with the ID: ${plant._id.toString()}.`);
