@@ -14,6 +14,8 @@
 import Database from '@stuyk/ezmongodb';
 import * as alt from 'alt-server';
 import { playerFuncs } from '../../server/extensions/Player';
+import { ServerObjectController } from '../../server/streamers/object';
+import { ServerTextLabelController } from '../../server/streamers/textlabel';
 import { InteractionController } from '../../server/systems/interaction';
 // import { ObjectController } from '../../server/systems/object';
 // import { TextLabelController } from '../../server/systems/textlabel';
@@ -63,15 +65,15 @@ alt.on('PlantSystem:Serverside:PlaceSeeds', async (plantId: string, InteractionT
 						playerFuncs.emit.notification(player, Translations.NO_FERTILIZER_IN_INVENTORY);
 						return;
 					} else if (fertilizerInInventory) {
-						player.data.inventory[fertilizerInInventory.tab][fertilizerInInventory.index].quantity -= 1;
-						if (player.data.inventory[fertilizerInInventory.tab][fertilizerInInventory.index].quantity <= 0) {
+						player.data.inventory[fertilizerInInventory.index].quantity -= 1;
+						if (player.data.inventory[fertilizerInInventory.index].quantity <= 0) {
 							playerFuncs.inventory.findAndRemove(player, fertilizer.name);
 						}
 						resyncPlayerInventory(player);
 					}
 				}
 				playerFuncs.emit.scenario(player, dbSettings.fertilizeScenario, dbSettings.fertilizeTime);
-				alt.emit('PlantSystem:Serverside:Fertilize', plantId.toString(), fertilizerInteraction.getType(), fertilizerInteraction.getIdentifier());
+				alt.emit('PlantSystem:Serverside:Fertilize', plantId.toString(), fertilizerInteraction.type, fertilizerInteraction.getIdentifier());
 			}
 		});
 	}, 250);
@@ -116,8 +118,8 @@ alt.on('PlantSystem:Serverside:WaterPlant', async (player: alt.Player, plantId: 
 					return;
 				} else if (plantWaterInInventory) {
 					updateSinglePlant(plantId.toString(), undefined, undefined, undefined, undefined, undefined, plantWater.data.waterAmount, undefined);
-					player.data.inventory[plantWaterInInventory.tab][plantWaterInInventory.index].quantity -= 1;
-					if (player.data.inventory[plantWaterInInventory.tab][plantWaterInInventory.index].quantity <= 0) {
+					player.data.inventory[plantWaterInInventory.index].quantity -= 1;
+					if (player.data.inventory[plantWaterInInventory.index].quantity <= 0) {
 						playerFuncs.inventory.findAndRemove(player, plantWater.name);
 					}
 				}
@@ -144,13 +146,13 @@ alt.on(
 			const budsInInventory = playerFuncs.inventory.isInInventory(player, { name: harvestOutcome.name });
 			const emptySlot = playerFuncs.inventory.getFreeInventorySlot(player);
 			if (!budsInInventory) {
-				playerFuncs.inventory.inventoryAdd(player, harvestOutcome, emptySlot.slot, emptySlot.tab);
+				playerFuncs.inventory.inventoryAdd(player, harvestOutcome, emptySlot.slot);
 			} else if (budsInInventory) {
-				player.data.inventory[budsInInventory.tab][budsInInventory.index].quantity += getRandomInt(dbSettings.minOutcome, dbSettings.maxOutcome);
+				player.data.inventory[budsInInventory.index].quantity += getRandomInt(dbSettings.minOutcome, dbSettings.maxOutcome);
 			}
 			removePlant(plantId);
-			ObjectController.remove(plantId.toString());
-			TextLabelController.remove(`Plant-${plantId.toString()}`);
+			ServerObjectController.remove(plantId.toString());
+			ServerTextLabelController.remove(`Plant-${plantId.toString()}`);
 			InteractionController.remove(InteractionType, InteractionIdentifier);
 			resyncPlayerInventory(player);
 		} else {
@@ -158,13 +160,13 @@ alt.on(
 			const budsInInventory = playerFuncs.inventory.isInInventory(player, { name: harvestOutcome.name });
 			const emptySlot = playerFuncs.inventory.getFreeInventorySlot(player);
 			if (!budsInInventory) {
-				playerFuncs.inventory.inventoryAdd(player, harvestOutcome, emptySlot.slot, emptySlot.tab);
+				playerFuncs.inventory.inventoryAdd(player, harvestOutcome, emptySlot.slot);
 			} else if (budsInInventory) {
-				player.data.inventory[budsInInventory.tab][budsInInventory.index].quantity += harvestOutcome.data.amount;
+				player.data.inventory[budsInInventory.index].quantity += harvestOutcome.data.amount;
 			}
 			removePlant(plantId);
-			ObjectController.remove(plantId.toString());
-			TextLabelController.remove(`Plant-${plantId.toString()}`);
+			ServerObjectController.remove(plantId.toString());
+			ServerTextLabelController.remove(`Plant-${plantId.toString()}`);
 			InteractionController.remove(InteractionType, InteractionIdentifier);
 			resyncPlayerInventory(player);
 		}

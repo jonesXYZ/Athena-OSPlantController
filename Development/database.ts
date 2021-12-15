@@ -2,9 +2,7 @@
  * The most configurable PlantSystem for the Athena Framework by Stuyk.   *
  * https://github.com/Stuyk/altv-athena                                   *
  * ---------------------------------------------------------------------- *
- * Written by Der Lord!                                                   *
- * Happy Hacktober! Support some OpenSource Projects you like.            *
- * https://hacktoberfest.digitalocean.com/                                *
+ * 						Written by Der Lord!                              *
  * ---------------------------------------------------------------------- *
  * Feel free to change whatever you need or dont want.                    *
  * Leave some feedback in the forums if you want to! I'd appreciate it.   *
@@ -20,9 +18,8 @@ import { PERMISSIONS } from '../../shared/flags/PermissionFlags';
 import { playerFuncs } from '../../server/extensions/Player';
 import { getVectorInFrontOfPlayer } from '../../server/utility/vector';
 import { InteractionController } from '../../server/systems/interaction';
-import { dbSettings, db_plantObjects, getRandomInt, Translations } from './settings';
+import { dbSettings, db_plantObjects, Translations } from './settings';
 import { getFromRegistry } from '../../shared/items/itemRegistry';
-import { resyncPlayerInventory } from './events';
 import { ServerObjectController } from '../../server/streamers/object';
 import { ServerTextLabelController } from '../../server/streamers/textlabel';
 
@@ -276,7 +273,7 @@ export async function loadPlants() {
 					data: `${Translations.STATE} ~g~${plant.data.state}`,
 					uid: `Plant-${plant._id.toString()}`
 				});
-			}, 250);
+			}, 1000);
 		}
 
 		ServerObjectController.append({
@@ -393,7 +390,7 @@ export async function updatePlants() {
 						);
 					}
 				});
-			}, 250);
+			}, 1000);
 			return;
 		}
 	});
