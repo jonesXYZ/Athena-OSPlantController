@@ -49,7 +49,8 @@ export enum Translations {
 export const defaultSettings = {
 	plantSystemEnabled: true, // is the PlantSystem enabled? default: true
 	plantUpdateInterval: 60000, // updateInterval for all Plants? default: 60000 (1 Minute)
-	createBlips: true // will blips be created on the bootup of the Athena Framework? Maybe you want to make it harder to find some spots.
+	createBlips: true, // will blips be created on the bootup of the Athena Framework? Maybe you want to make it harder to find some spots.
+	textLabelDistance: 3,
 };
 
 export const blipSettings = {

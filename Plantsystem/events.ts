@@ -3,8 +3,6 @@
  * https://github.com/Stuyk/altv-athena                                   *
  * ---------------------------------------------------------------------- *
  * Written by Der Lord!                                                   *
- * Happy Hacktober! Support some OpenSource Projects you like.            *
- * https://hacktoberfest.digitalocean.com/                                *
  * ---------------------------------------------------------------------- *
  * Feel free to change whatever you need or dont want.                    *
  * Leave some feedback in the forums if you want to! I'd appreciate it.   *
@@ -17,9 +15,6 @@ import { playerFuncs } from '../../server/extensions/Player';
 import { ServerObjectController } from '../../server/streamers/object';
 import { ServerTextLabelController } from '../../server/streamers/textlabel';
 import { InteractionController } from '../../server/systems/interaction';
-// import { ObjectController } from '../../server/systems/object';
-// import { TextLabelController } from '../../server/systems/textlabel';
-import { PLAYER_SYNCED_META } from '../../shared/enums/playerSynced';
 import { getFromRegistry } from '../../shared/items/itemRegistry';
 
 import { buildPlant, removePlant, updateSinglePlant } from './database';
@@ -153,7 +148,7 @@ alt.on(
 			removePlant(plantId);
 			ServerObjectController.remove(plantId.toString());
 			ServerTextLabelController.remove(`Plant-${plantId.toString()}`);
-			InteractionController.remove(InteractionType, InteractionIdentifier);
+			InteractionController.remove('WeedPlant-Interaction', InteractionIdentifier);
 			resyncPlayerInventory(player);
 		} else {
 			const harvestOutcome = getFromRegistry('weedbuds');

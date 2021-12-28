@@ -11,17 +11,17 @@
  **************************************************************************/
 import * as alt from 'alt-server';
 import Database from '@stuyk/ezmongodb';
-import Plants from './interface';
 import ChatController from '../../server/systems/chat';
 
-import { PERMISSIONS } from '../../shared/flags/PermissionFlags';
 import { playerFuncs } from '../../server/extensions/Player';
 import { getVectorInFrontOfPlayer } from '../../server/utility/vector';
 import { InteractionController } from '../../server/systems/interaction';
-import { dbSettings, db_plantObjects, Translations } from './settings';
+import { dbSettings, db_plantObjects, defaultSettings, Translations } from './settings';
 import { getFromRegistry } from '../../shared/items/itemRegistry';
 import { ServerObjectController } from '../../server/streamers/object';
 import { ServerTextLabelController } from '../../server/streamers/textlabel';
+import { PERMISSIONS } from '../../shared/flags/permissionFlags';
+import IPlants from './interface';
 
 ChatController.addCommand('testPlant', '/testPlant - testing this glorious plantsystem without items!', PERMISSIONS.ADMIN, buildPlant);
 
@@ -48,14 +48,14 @@ export async function buildPlant(player: alt.Player) {
 	};
 
 	if (dbSettings.plantLimit) {
-		const getPlayerPlants = await Database.selectData<Plants>('plants', ['ownerId']);
+		const getPlayerPlants = await Database.selectData<IPlants>('plants', ['ownerId']);
 		if (getPlayerPlants.length >= dbSettings.maximumAllowedPlants) {
 			playerFuncs.emit.notification(player, 'You already have planted the maximum of allowed plants.');
 			return;
 		}
 	}
 
-	const databasePlants = await Database.insertData<Plants>(newDocument, 'plants', true);
+	const databasePlants = await Database.insertData<IPlants>(newDocument, 'plants', true);
 	if (!databasePlants) {
 		generatePlantError('Could not insert data for the table <plants>.');
 	}
@@ -70,7 +70,8 @@ export async function buildPlant(player: alt.Player) {
 	ServerTextLabelController.append({
 		pos: { x: forwardVector.x, y: forwardVector.y, z: forwardVector.z },
 		data: `${Translations.STATE} ~g~${databasePlants.data.state}~n~~w~${Translations.TIME} ~g~${databasePlants.data.time}~n~~w~${Translations.WATER} ~g~${databasePlants.data.water}%~n~~w~${Translations.FERTILIZER} ~g~${databasePlants.data.hasFertilizer}`,
-		uid: `Plant-${databasePlants._id.toString()}`
+		uid: `Plant-${databasePlants._id.toString()}`,
+		maxDistance: defaultSettings.textLabelDistance
 	});
 
 	const placingInteraction = InteractionController.add({
@@ -115,7 +116,7 @@ export async function buildPlant(player: alt.Player) {
 }
 
 export async function loadPlants() {
-	const allDatabasePlants = await Database.fetchAllData<Plants>('plants');
+	const allDatabasePlants = await Database.fetchAllData<IPlants>('plants');
 
 	if (!allDatabasePlants) {
 		generatePlantError('Could not fetch data for table <plants>.');
@@ -207,7 +208,7 @@ export async function loadPlants() {
 				}
 			});
 		} else if (plant.data.water >= 0 && plant.data.water < 100) {
-			InteractionController.add({
+			const waterInteraction = InteractionController.add({
 				position: {
 					x: plant.position.x,
 					y: plant.position.y,
@@ -218,6 +219,7 @@ export async function loadPlants() {
 				type: `WeedPlant-Interaction`,
 				callback: (player: alt.Player) => {
 					alt.emit('PlantSystem:Serverside:WaterPlant', player, plant._id.toString());
+					/* */
 				}
 			});
 		}
@@ -255,7 +257,8 @@ export async function loadPlants() {
 			ServerTextLabelController.append({
 				pos: { x: plant.position.x, y: plant.position.y, z: plant.position.z },
 				data: `${Translations.STATE} ~g~${plant.data.state}~n~~w~${Translations.TIME} ~g~${plant.data.time}~n~~w~${Translations.WATER} ~g~${plant.data.water}%~n~~w~${Translations.FERTILIZER} ~g~${plant.data.hasFertilizer}`,
-				uid: `Plant-${plant._id.toString()}`
+				uid: `Plant-${plant._id.toString()}`,
+				maxDistance: defaultSettings.textLabelDistance
 			});
 		}
 
@@ -270,9 +273,10 @@ export async function loadPlants() {
 						z: plant.position.z
 					},
 					data: `${Translations.STATE} ~g~${plant.data.state}`,
-					uid: `Plant-${plant._id.toString()}`
+					uid: `Plant-${plant._id.toString()}`,
+					maxDistance: defaultSettings.textLabelDistance
 				});
-			}, 1000);
+			}, 250);
 		}
 
 		ServerObjectController.append({
@@ -288,7 +292,7 @@ export async function loadPlants() {
 }
 
 export async function updatePlants() {
-	const allDatabasePlants = Database.fetchAllData<Plants>('plants');
+	const allDatabasePlants = Database.fetchAllData<IPlants>('plants');
 	if (!allDatabasePlants) {
 		generatePlantError('Could not fetch data for table <plants>.');
 	}
@@ -296,14 +300,13 @@ export async function updatePlants() {
 	(await allDatabasePlants).forEach(async (plant) => {
 		if (!plant.data.hasSeeds || !plant.data.hasFertilizer || plant.data.water < dbSettings.plantRequiredWaterToGrowh) return;
 
-		alt.setTimeout(() => {
-			ServerTextLabelController.remove(`Plant-${plant._id.toString()}`);
-			ServerTextLabelController.append({
-				pos: plant.position,
-				data: `${Translations.STATE} ~g~${plant.data.state}~n~~w~${Translations.TIME} ~g~${plant.data.time}~n~~w~${Translations.WATER} ~g~${plant.data.water}%~n~~w~${Translations.FERTILIZER} ~g~${plant.data.hasFertilizer}`,
-				uid: `Plant-${plant._id.toString()}`
-			});
-		}, 500);
+		ServerTextLabelController.remove(`Plant-${plant._id.toString()}`);
+		ServerTextLabelController.append({
+			pos: plant.position,
+			data: `${Translations.STATE} ~g~${plant.data.state}~n~~w~${Translations.TIME} ~g~${plant.data.time}~n~~w~${Translations.WATER} ~g~${plant.data.water}%~n~~w~${Translations.FERTILIZER} ~g~${plant.data.hasFertilizer}`,
+			uid: `Plant-${plant._id.toString()}`,
+			maxDistance: defaultSettings.textLabelDistance
+		});
 
 		if (plant.data.water >= 100) plant.data.water = 100;
 		if (plant.data.time == dbSettings.plantMediumState) {
@@ -374,7 +377,8 @@ export async function updatePlants() {
 				ServerTextLabelController.append({
 					pos: plant.position,
 					data: `${Translations.STATE} ~g~${plant.data.state}`,
-					uid: `Plant-${plant._id.toString()}`
+					uid: `Plant-${plant._id.toString()}`,
+					maxDistance: defaultSettings.textLabelDistance
 				});
 
 				InteractionController.remove(`WeedPlant-Interaction`, `Plant-${plant._id.toString()}`);
@@ -391,7 +395,7 @@ export async function updatePlants() {
 						);
 					}
 				});
-			}, 1000);
+			}, 250);
 			return;
 		}
 	});
@@ -407,7 +411,7 @@ export async function updateSinglePlant(
 	water?: number,
 	time?: number
 ) {
-	const plant = await Database.fetchData<Plants>('_id', idToUpdate, 'plants');
+	const plant = await Database.fetchData<IPlants>('_id', idToUpdate, 'plants');
 
 	if (seedState != undefined) plant.data.hasSeeds = seedState;
 	if (fertilizerState != undefined) plant.data.hasFertilizer = fertilizerState;
@@ -434,14 +438,6 @@ export async function updateSinglePlant(
 		},
 		'plants'
 	);
-	alt.setTimeout(() => {
-		ServerTextLabelController.remove(`Plant-${plant._id.toString()}`);
-		ServerTextLabelController.append({
-			pos: plant.position,
-			data: `${Translations.STATE} ~g~${plant.data.state}~n~~w~${Translations.TIME} ~g~${plant.data.time}~n~~w~${Translations.WATER} ~g~${plant.data.water}%~n~~w~${Translations.FERTILIZER} ~g~${plant.data.hasFertilizer}`,
-			uid: `Plant-${plant._id.toString()}`
-		});
-	}, 250);
 
 	if (dbSettings.logsEnabled) {
 		alt.log(`Updating Plant with the ID: ${plant._id.toString()}.`);

@@ -2,9 +2,7 @@
  * The most configurable PlantSystem for the Athena Framework by Stuyk.   *
  * https://github.com/Stuyk/altv-athena                                   *
  * ---------------------------------------------------------------------- *
- * Written by Der Lord!                                                   *
- * Happy Hacktober! Support some OpenSource Projects you like.            *
- * https://hacktoberfest.digitalocean.com/                                *
+ * 						Written by Der Lord!                              *
  * ---------------------------------------------------------------------- *
  * Feel free to change whatever you need or dont want.                    *
  * Leave some feedback in the forums if you want to! I'd appreciate it.   *
@@ -12,7 +10,7 @@
  * https://github.com/Booster1212/AthenaPlantsystem                       *
  **************************************************************************/
 import { ITEM_TYPE } from '../../shared/enums/itemTypes';
-import { Item } from '../../shared/interfaces/Item';
+import { Item } from '../../shared/interfaces/item';
 import { appendToItemRegistry } from '../../shared/items/itemRegistry';
 import { deepCloneObject } from '../../shared/utility/deepCopy';
 
