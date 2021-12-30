@@ -3,8 +3,11 @@ import * as alt from 'alt-server';
 import { isPlayerInCutscene } from 'natives';
 import { ATHENA_PLANTCONTROLLER, DATABASE_SETTINGS } from '.';
 import { playerFuncs } from '../../server/extensions/Player';
+import { DiscordController } from '../../server/systems/discord';
 import { sha256 } from '../../server/utility/encryption';
 import IPlants from './src/interfaces/IPlants';
+
+const result = { id: '' };
 
 export enum PLANTCONTROLLER_EVENTS {
     addPlant = 'PlantController:Server:CreatePot',
@@ -13,7 +16,7 @@ export enum PLANTCONTROLLER_EVENTS {
 
 export class PlantController implements IPlants {
     _id?: string;
-    model?: string;
+    model: string;
     data: { 
         owner?: string; 
         type?: string; 
@@ -43,17 +46,29 @@ export class PlantController implements IPlants {
     }
     
     /**
-    * @param model Model of the Pot Object.
-    * @param data.owner The name of the pot owner.
-    * @param data.type type of harvested buds.
-    * @param data.seeds seeding state of this plant pot.
-    * @param data.fertilized fertilizing state of this plant pot.
-    * @param data.state State which will result into 'growing' or something.
-    * @param data.remaining remaining time until plant is finished.
-    * @param data.water water level of this plant.
-    * @param data.harvestable is plant harvestable or not
-    * @param position alt.Vector3
     * @memberof PlantController
+    * @param _id Unique Identifier of this Plant.
+    * @type string
+    * @param model Model of the Pot Object.
+    * @type string
+    * @param data.owner The name of the Plant Owner.
+    * @type string
+    * @param data.type Harvest Bud Outcome.
+    * @type string
+    * @param data.seeds Is this Plant seeded or not?
+    * @type boolean
+    * @param data.fertilized Is this Plant fertilized or not?
+    * @type boolean
+    * @param data.state State which will result into 'growing' or something.
+    * @type string
+    * @param data.remaining Remaining time until harvestable.
+    * @type number
+    * @param data.water Water level of this plant 0-100.
+    * @type number
+    * @param data.harvestable Is this Plant harvestable?
+    * @type boolean
+    * @param position Plant Position as alt.Vector3
+    * @type alt.Vector
     */
     static async addPlant(player: alt.Player, data: IPlants) {
         alt.log("PlantController - " + JSON.stringify(data));
@@ -66,7 +81,7 @@ export class PlantController implements IPlants {
     * @param id id which is needed to remove a plant from the database collection.
     */ 
     static async removePlant(id: string) {
-
+        await Database.deleteById(id, DATABASE_SETTINGS.collectionName);
     }
 
     /** 
@@ -75,23 +90,22 @@ export class PlantController implements IPlants {
     * @param id id which is needed to remove a plant from the database collection.
     */ 
     static async removeNearestPlant(player: alt.Player, id: string) {
-        this.findNearestPlant(player)
+        this.findNearestPlant(player);
         await Database.deleteById(id, DATABASE_SETTINGS.collectionName);
     }
     /** 
     * @memberof PlantController
     * @param player alt.Player - Used to find the nearest plant.
+    * @returns plant_id as string - Useful for scripting purposes ;)
     */ 
-    static async findNearestPlant(player: alt.Player) {
+    static async findNearestPlant(player: alt.Player): Promise<String> {
         const plants = await Database.fetchAllData<IPlants>(DATABASE_SETTINGS.collectionName);
         plants.forEach((plant, i) => {
-            if(player.pos.isInRange(plant.position, ATHENA_PLANTCONTROLLER.searchRange)) {
-                alt.log(`ID of nearest pod -> ${plant._id}`);
-            } else {
-                return false;
-            }
-            return true;
+            if(player.pos.isInRange(plant.position, 2)) {
+                result.id = plant._id;
+            } 
         });
+        return result.id;
     }
 
     static seedPlant() {
@@ -106,7 +120,20 @@ export class PlantController implements IPlants {
 
     }
 
-    static updatePlant(player: alt.Player) {
+    static harvestPlant() {
 
+    }
+
+    static updatePlant(player: alt.Player, id: string) {
+
+    }
+
+    static log(msg: string) {
+        if(ATHENA_PLANTCONTROLLER.useDiscordLogs) {
+            DiscordController.sendToChannel(ATHENA_PLANTCONTROLLER.discordChannel, msg);
+        } else {
+            alt.log("Please enable useDiscordLog to use this feature.");
+            return;
+        }
     }
 }

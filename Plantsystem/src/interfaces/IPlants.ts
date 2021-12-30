@@ -12,7 +12,7 @@
 import * as alt from 'alt-server';
 export default interface IPlants {
 	_id?: string;
-	model?: string;
+	model: string;
 	data: {
 		owner?: string;
 		type?: string;

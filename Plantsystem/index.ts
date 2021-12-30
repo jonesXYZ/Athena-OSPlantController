@@ -26,7 +26,9 @@ import { PlantController } from './PlantController';
 export const ATHENA_PLANTCONTROLLER = {
 	name: 'PlantSystem',
 	version: 'v3.0',
-	searchRange: 0.5 // Used to find nearest Plant-Pot.
+	searchRange: 2, // Used to find nearest Plant-Pot.
+	useDiscordLogs: false,
+	discordChannel: 'someChannelId'
 }
 
 export const DATABASE_SETTINGS = {
@@ -55,6 +57,7 @@ ChatController.addCommand('Testplants', '/Testplants - Testing Plant System.', P
 
 function someTest(player: alt.Player) {
 	PlantController.addPlant(player, {
+		model: PLANT_SETTINGS.smallPot,
 		data: {
 			owner: 'Test',
 			type: 'Test',
@@ -66,5 +69,9 @@ function someTest(player: alt.Player) {
 			harvestable: false
 		},
 		position: { x: player.pos.x, y: player.pos.y, z: player.pos.z - 1 } as alt.Vector3
+	});
+	const id = PlantController.findNearestPlant(player);
+	id.then(function(result) {
+		alt.log(result);
 	});
 }
