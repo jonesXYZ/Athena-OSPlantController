@@ -10,30 +10,25 @@
  * https://github.com/Booster1212/AthenaPlantsystem                       *
  **************************************************************************/
 import * as alt from 'alt-server';
-import './database';
-import './events';
-import './interface';
-import './items';
-import './settings';
-import { ServerBlipController } from '../../server/systems/blip';
-import { SYSTEM_EVENTS } from '../../shared/enums/system';
-import { loadPlants, updatePlants } from './database';
-import { blipSettings, defaultSettings, plantSpots } from './settings';
 import { PluginSystem } from '../../server/systems/plugins';
-import Database from '@stuyk/ezmongodb';
+import './src/database';
+import './src/server-events';
+import './src/interfaces/IPlants';
+import './src/items';
+import './src/settings';
+const ATHENA_PLANTSYSTEM = {
+	name: 'PlantSystem',
+	version: 1.0
+}
 
-alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, setPlantInterval);
-
-const ATHENA_PLANTSYSTEM = 'Athena Plantsystem';
-
-PluginSystem.registerPlugin(ATHENA_PLANTSYSTEM, () => {
-    alt.log(`~lg~${ATHENA_PLANTSYSTEM} was successfully loaded`);
-	loadPlants();
-	Database.createCollection('plants');
+PluginSystem.registerPlugin(ATHENA_PLANTSYSTEM.name, () => {
+    alt.log(`~lg~${ATHENA_PLANTSYSTEM.name} ${ATHENA_PLANTSYSTEM.version} ==> sucessfully loaded.`);
+    // setPlantInterval();
 });
-
-function setPlantInterval() {
+/* function setPlantInterval() {
 	if (!defaultSettings.plantSystemEnabled) return false;
+
+	loadPlants();
 
 	alt.setInterval(() => {
 		updatePlants();
@@ -54,3 +49,4 @@ function setPlantInterval() {
 	}
 	return true;
 }
+*/
