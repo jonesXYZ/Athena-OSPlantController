@@ -9,10 +9,19 @@
  * Also feel free to open a PR / issue on my GitHub if you need something *
  * https://github.com/Booster1212/AthenaPlantsystem                       *
  **************************************************************************/
+import * as alt from 'alt-server';
 export default interface IPlants {
 	_id?: string;
+	model?: string;
 	data: {
 		owner?: string;
+		type?: string;
+		seeds?: boolean;
+		fertilized?: boolean;
+		state?: string;
+		remaining?: number;
+		water?: number;
 		harvestable?: boolean;
 	}
+	position: alt.Vector3;
 }
