@@ -1,6 +1,6 @@
 import Database from '@stuyk/ezmongodb';
 import * as alt from 'alt-server';
-import { ATHENA_PLANTSYSTEM, DATABASE_SETTINGS } from '..';
+import { ATHENA_PLANTCONTROLLER, DATABASE_SETTINGS } from '..';
 import { ServerObjectController } from '../../../server/streamers/object';
 import IPlants from './interfaces/IPlants';
 
@@ -13,7 +13,7 @@ export async function loadPlants() {
             pos: plant.position,
         });
     });
-    alt.log(`~lg~${ATHENA_PLANTSYSTEM.name} ${ATHENA_PLANTSYSTEM.version} | DATABASE | ==> found ${plants.length} plants to load.`);
+    alt.log(`~lg~${ATHENA_PLANTCONTROLLER.name} ${ATHENA_PLANTCONTROLLER.version} | DATABASE | ==> found ${plants.length} plants to load.`);
 }
 
 export async function updatePlants() {

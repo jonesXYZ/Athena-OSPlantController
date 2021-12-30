@@ -1,6 +1,6 @@
 import * as alt from 'alt-server';
 import IPlants from './interfaces/IPlants';
 
-alt.on('PlantSystem:Server:CreatePot', (player: alt.Player, data: IPlants) => {
-
+alt.on('PlantController:Server:CreatePot', (player: alt.Player, data: IPlants) => {
+    alt.log(`${player.data.name} tried to place a weedpot. ${data}!`);
 });

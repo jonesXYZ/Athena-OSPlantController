@@ -12,22 +12,21 @@
  import * as alt from 'alt-server';
 import Database from '@stuyk/ezmongodb';
 import { PluginSystem } from '../../server/systems/plugins';
-
+import './PlantController';
 import './src/interfaces/IPlants';
 import './src/server-functions';
 import './src/server-database';
 import './src/server-events';
 import './src/server-items';
 import { loadPlants } from './src/server-database';
-import IPlants from './src/interfaces/IPlants';
-import { createPlant } from './src/server-functions';
 import ChatController from '../../server/systems/chat';
 import { PERMISSIONS } from '../../shared/flags/permissionFlags';
 import { PlantController } from './PlantController';
 
-export const ATHENA_PLANTSYSTEM = {
+export const ATHENA_PLANTCONTROLLER = {
 	name: 'PlantSystem',
-	version: 'v3.0'
+	version: 'v3.0',
+	searchRange: 0.5 // Used to find nearest Plant-Pot.
 }
 
 export const DATABASE_SETTINGS = {
@@ -46,26 +45,26 @@ export const BLIP_SETTINGS = {
 	// scale: 
 }
 
-PluginSystem.registerPlugin(ATHENA_PLANTSYSTEM.name, async () => {
-    alt.log(`~lg~${ATHENA_PLANTSYSTEM.name} ${ATHENA_PLANTSYSTEM.version} ==> sucessfully loaded.`);
+PluginSystem.registerPlugin(ATHENA_PLANTCONTROLLER.name, async () => {
+    alt.log(`~lg~${ATHENA_PLANTCONTROLLER.name} ${ATHENA_PLANTCONTROLLER.version} ==> sucessfully loaded.`);
 	await Database.createCollection(DATABASE_SETTINGS.collectionName);
 	loadPlants();
 });
 
 ChatController.addCommand('Testplants', '/Testplants - Testing Plant System.', PERMISSIONS.ADMIN, someTest);
 
-function someTest(player: alt.Player, ) {
+function someTest(player: alt.Player) {
 	PlantController.addPlant(player, {
 		data: {
-			owner: '',
-			type: '',
+			owner: 'Test',
+			type: 'Test',
 			seeds: false,
 			fertilized: false,
-			state: '',
+			state: 'Test',
 			remaining: 0,
 			water: 0,
 			harvestable: false
 		},
-		position: player.pos as alt.Vector3
+		position: { x: player.pos.x, y: player.pos.y, z: player.pos.z - 1 } as alt.Vector3
 	});
 }
