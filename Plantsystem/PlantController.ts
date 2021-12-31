@@ -47,10 +47,10 @@ export class PlantController implements IPlants {
     }
 
     /**
-    * @memberof PlantController
-    * @param player alt.Player
-    * @param IPlants IPlants Interface
-    */
+     * @memberof PlantController
+     * @param player alt.Player
+     * @param IPlants IPlants Interface
+     */
     static async addPlant(player: alt.Player, data: IPlants): Promise<IPlants | null> {
         const plantData = await Database.insertData(data, PLANTCONTROLLER_DATABASE.collectionName, true);
         alt.emit(PLANTCONTROLLER_EVENTS.addPlant, player, data);
@@ -113,9 +113,9 @@ export class PlantController implements IPlants {
         await Database.updatePartialData(id, updateDocument, PLANTCONTROLLER_DATABASE.collectionName);
     }
     /**
-    * Used to set a PlantController Log to Discord, if enabled.
-    * @param msg 
-    */
+     * Used to set a PlantController Log to Discord, if enabled.
+     * @param msg
+     */
     static log(msg: string) {
         if (ATHENA_PLANTCONTROLLER.useDiscordLogs) {
             DiscordController.sendToChannel(ATHENA_PLANTCONTROLLER.discordChannel, msg);
@@ -126,15 +126,10 @@ export class PlantController implements IPlants {
     }
 
     /**
-    * Used to build a new pot object, should be used with/after PlantController.addPlant(...); 
-    * @param data IPlants Interface 
-    */
-    static buildObject(data: IPlants) {
-        ServerTextLabelController.append({
-            uid: `${data._id}`,
-            pos: data.position as alt.Vector3,
-            data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~g~${data.data.state}`,
-        }); 
+     * Used to build a new pot object, should be used with/after PlantController.addPlant(...);
+     * @param data IPlants Interface
+     */
+    static async buildObject(data: IPlants) {
         ServerObjectController.append({
             pos: data.position as alt.Vector3,
             model: PLANTCONTROLLER_SETTINGS.smallPot,
@@ -143,17 +138,19 @@ export class PlantController implements IPlants {
     }
 
     /**
-    * Used to refresh the Textlabels on state changing and so on.
-    * @param data IPlants Interface
-    */
+     * Used to refresh the Textlabels on state changing and so on.
+     * @param data IPlants Interface
+     */
     static refreshLabels(data: IPlants) {
-        ServerTextLabelController.remove(data._id);
-        alt.setTimeout(() => {
+        const removed = ServerTextLabelController.remove(data._id);
+        if (removed) {
             ServerTextLabelController.append({
-                uid: `${data._id}`,
-                pos: data.position as alt.Vector3,
-                data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~g~${data.data.state}`,
+                uid: data._id,
+                pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5},
+                data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~n~~g~${data.data.state}~n~~n~~b~${data.data.water}% ~w~| ~g~${data.data.remaining}m`,
             });
-        }, 1000*30);
+        } else {
+            alt.log('Something went wrong.');
+        }
     }
 }

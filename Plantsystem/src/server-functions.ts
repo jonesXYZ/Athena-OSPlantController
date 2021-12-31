@@ -5,7 +5,7 @@ import { loadPlants, updatePlants } from './server-database';
 export function setPlantInterval() {
 	loadPlants();
 	alt.setInterval(() => {
-		updatePlants();
+		// updatePlants();
 	}, PLANTCONTROLLER_SETTINGS.updateInterval);
 }
 

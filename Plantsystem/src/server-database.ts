@@ -22,9 +22,9 @@ export async function loadPlants() {
         });
 
         ServerTextLabelController.append({
-            uid: `${data._id}`,
-            pos: data.position as alt.Vector3,
-            data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~g~${data.data.state}`,
+            uid: data._id,
+            pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5},
+            data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~n~~g~${data.data.state}~n~~n~~b~${data.data.water}% ~w~| ~g~${data.data.remaining}m`,
         });
 
         if (!data.data.seeds) {
@@ -43,6 +43,22 @@ export async function loadPlants() {
                     PlantController.updatePlant(data._id, data);
                 },
             });
+        } else if (!data.data.fertilized) {
+            InteractionController.add({
+                identifier: `${data._id}`,
+                type: 'PlantController',
+                position: data.position as alt.Vector3,
+                description: PLANTCONTROLLER_TRANSLATIONS.seedingInteraction,
+                disableMarker: true,
+                range: PLANTCONTROLLER_SETTINGS.interactionRange,
+                callback: (player: alt.Player) => {
+                    data.data.fertilized = true;
+                    data.data.state = 'Requires Water.';
+
+                    InteractionController.remove(`PlantController`, `${data._id}`);
+                    PlantController.updatePlant(data._id, data);
+                },
+            });
         }
     });
     alt.log(
@@ -50,10 +66,10 @@ export async function loadPlants() {
     );
 }
 
-export async function updatePlants() {
+export async function updatePlants(data: IPlants) {
     const plants = Database.fetchAllData<IPlants>(PLANTCONTROLLER_DATABASE.collectionName);
     (await plants).forEach(async (plant, i) => {
-        await Database.updatePartialData(plant._id.toString(), {}, PLANTCONTROLLER_DATABASE.collectionName);
+        await Database.updatePartialData(plant._id.toString(), data, PLANTCONTROLLER_DATABASE.collectionName);
     });
 }
 

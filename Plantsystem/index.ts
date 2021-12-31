@@ -57,7 +57,9 @@ export const BLIP_SETTINGS = {
 };
 
 export enum PLANTCONTROLLER_TRANSLATIONS {
-    seedingInteraction = 'Plant seeds',
+    seedingInteraction = 'Plant Seeds',
+	fertilizingInteraction = 'Fertilize',
+	waterInteraction = 'Water Plant',
 }
 PluginSystem.registerPlugin(ATHENA_PLANTCONTROLLER.name, async () => {
     alt.log(`~lg~${ATHENA_PLANTCONTROLLER.name} ${ATHENA_PLANTCONTROLLER.version} ==> sucessfully loaded.`);
@@ -84,22 +86,56 @@ function someTest(player: alt.Player) {
     });
     plant.then(function (data) {
 		PlantController.buildObject(data);
-        InteractionController.add({
-            identifier: `${data._id}`,
-            type: 'PlantController',
-            position: data.position as alt.Vector3,
-            description: PLANTCONTROLLER_TRANSLATIONS.seedingInteraction,
-            disableMarker: true,
-            range: PLANTCONTROLLER_SETTINGS.interactionRange,
-            callback: (player: alt.Player) => {
-                data.data.seeds = true;
-                data.data.state = 'Requires Fertilizer.';
-
-                InteractionController.remove(`PlantController`, `${data._id}`);
-                PlantController.updatePlant(data._id, data);
-				PlantController.refreshLabels(data);
-            },
+		ServerTextLabelController.append({
+            uid: data._id,
+			pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5},
+			data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~n~~g~${data.data.state}~n~~n~~b~${data.data.water}% ~w~| ~g~${data.data.remaining}m`,
         });
+		if(!data.data.seeds) {
+			InteractionController.add({
+				identifier: `${data._id}`,
+				type: 'PlantController',
+				position: data.position as alt.Vector3,
+				description: PLANTCONTROLLER_TRANSLATIONS.seedingInteraction,
+				disableMarker: true,
+				range: PLANTCONTROLLER_SETTINGS.interactionRange,
+				callback: (player: alt.Player) => {
+					data.data.seeds = true;
+					data.data.state = 'Requires Seeds.';
+
+					InteractionController.remove(`PlantController`, `${data._id}`);
+					PlantController.updatePlant(data._id, data);
+					PlantController.refreshLabels(data);
+
+					InteractionController.add({
+						identifier: `${data._id}`,
+						type: 'PlantController',
+						position: data.position as alt.Vector3,
+						description: PLANTCONTROLLER_TRANSLATIONS.fertilizingInteraction,
+						disableMarker: true,
+						range: PLANTCONTROLLER_SETTINGS.interactionRange,
+						callback: () => {
+							data.data.fertilized = true;
+							data.data.state = 'Requires Water.';
+							InteractionController.remove(`PlantController`, `${data._id}`);
+							PlantController.updatePlant(data._id, data);
+							PlantController.refreshLabels(data);
+							InteractionController.add({
+								identifier: `${data._id}`,
+								type: 'PlantController',
+								position: data.position as alt.Vector3,
+								description: PLANTCONTROLLER_TRANSLATIONS.fertilizingInteraction,
+								disableMarker: true,
+								range: PLANTCONTROLLER_SETTINGS.interactionRange,
+								callback: () => {
+
+								}
+							});
+						}
+					});
+				},
+			});
+		} 
     });
 }
 /*
