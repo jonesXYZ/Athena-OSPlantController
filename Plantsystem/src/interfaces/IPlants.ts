@@ -15,6 +15,7 @@ export default interface IPlants {
 	model: string;
 	data: {
 		owner?: string;
+		variety?: string;
 		type?: string;
 		seeds?: boolean;
 		fertilized?: boolean;

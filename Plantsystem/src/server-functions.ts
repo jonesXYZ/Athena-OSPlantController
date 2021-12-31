@@ -1,12 +1,12 @@
 import * as alt from 'alt-server';
-import { PLANT_SETTINGS } from '..';
+import { PLANTCONTROLLER_SETTINGS } from '../index';
 import { loadPlants, updatePlants } from './server-database';
 
 export function setPlantInterval() {
 	loadPlants();
 	alt.setInterval(() => {
 		updatePlants();
-	}, PLANT_SETTINGS.updateInterval);
+	}, PLANTCONTROLLER_SETTINGS.updateInterval);
 }
 
 export function createPlant() {

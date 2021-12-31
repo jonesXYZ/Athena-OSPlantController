@@ -1,19 +1,20 @@
 import * as alt from 'alt-server';
 import { ItemFactory } from '../../../server/systems/item';
 import { sha256 } from '../../../server/utility/encryption';
-import { ITEM_TYPE } from '../../../shared/enums/ItemTypes';
+import { ITEM_TYPE } from '../../../shared/enums/itemTypes';
 import { Item } from '../../../shared/interfaces/item';
 
-const ITEM_SETTINGS = {
+const PLANTCONTROLLER_ITEMS = {
     fertilizerItemName: 'Fertilizer', // Change me before booting if you need to.
 	seedsItemName: 'Seeds', // Change me before booting if you need to.
 	waterItemName: 'Plantwater', // Change me before booting if you need to.
 	potItemName: 'Plant Pot', // Change me before booting if you need to.
 	budItemName: 'Buds', // Change me before booting if you need to.
 }
+
 const potItem: Item = {
-    name: ITEM_SETTINGS.potItemName,
-    uuid: sha256(ITEM_SETTINGS.potItemName),
+    name: PLANTCONTROLLER_ITEMS.potItemName,
+    uuid: sha256(PLANTCONTROLLER_ITEMS.potItemName),
     description: 'Powerful Database Description',
     icon: 'crate',
     quantity: 1,
@@ -23,7 +24,7 @@ const potItem: Item = {
         event: 'PlantSystem:Server:CreatePot'
     },
     rarity: 3,
-    dbName: ITEM_SETTINGS.potItemName
+    dbName: PLANTCONTROLLER_ITEMS.potItemName
 };
 
 await ItemFactory.add(potItem);
