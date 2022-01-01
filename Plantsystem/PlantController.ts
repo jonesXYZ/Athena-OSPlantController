@@ -8,11 +8,6 @@ import IPlants from './src/interfaces/IPlants';
 
 const result = { id: '' };
 
-export enum PLANTCONTROLLER_EVENTS {
-    addPlant = 'PlantController:Server:CreatePot',
-    removePlant = 'PlantController:Server:RemovePot',
-}
-
 export class PlantController implements IPlants {
     _id?: string;
     model: string;
@@ -94,10 +89,6 @@ export class PlantController implements IPlants {
         });
         return result.id;
     }
-
-    static waterPlant(data: IPlants) {}
-
-    static harvestPlant() {}
 
     /**
      * Update the plant's data in the database.
