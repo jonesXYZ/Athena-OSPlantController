@@ -1,15 +1,11 @@
 import * as alt from 'alt-server';
 import Database from '@stuyk/ezmongodb';
 import { PluginSystem } from '../../server/systems/plugins';
-import { loadPlants } from './src/server-database';
 import { ServerBlipController } from '../../server/systems/blip';
 import { SYSTEM_EVENTS } from '../../shared/enums/system';
-import { PlantController } from './PlantController';
 
 import './PlantController';
 import './src/interfaces/IPlants';
-import './src/server-functions';
-import './src/server-database';
 import './src/server-events';
 import './src/server-items';
 
@@ -37,20 +33,20 @@ export const PLANTCONTROLLER_SETTINGS = {
 };
 
 export const PLANTCONTROLLER_ANIMATIONS = {
-    seedingAnimName: 'amb@world_human_gardener_plant@male@base',
-    seedingAnimDict: 'base',
+    seedingAnimName: 'base',
+    seedingAnimDict: 'amb@world_human_gardener_plant@male@base',
     seedingAnimDuration: 3000,
 
-    fertilizingAnimName: '',
-    fertilizingAnimDict: '',
+    fertilizingAnimName: 'default',
+    fertilizingAnimDict: 'default',
     fertilizingAnimDuration: 3000,
 
-    waterAnimName: '',
-    waterAnimDict: '',
+    waterAnimName: 'default',
+    waterAnimDict: 'default',
     waterAnimDuration: 3000,
 
-    harvestAnimName: '',
-    harvestAnimDict: '',
+    harvestAnimName: 'default',
+    harvestAnimDict: 'default',
     harvestAnimDuration: 3000,
 };
 
@@ -85,7 +81,6 @@ export enum PLANTCONTROLLER_TRANSLATIONS {
 PluginSystem.registerPlugin(ATHENA_PLANTCONTROLLER.name, async () => {
     alt.log(`~lg~${ATHENA_PLANTCONTROLLER.name} ${ATHENA_PLANTCONTROLLER.version} ==> sucessfully loaded.`);
     await Database.createCollection(PLANTCONTROLLER_DATABASE.collectionName);
-    loadPlants();
 });
 
 alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, () => {
@@ -100,5 +95,5 @@ alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, () => {
             uid: i.toString(),
         });
     });
-    PlantController.loadPlants();
+    // PlantController.loadPlants();
 });

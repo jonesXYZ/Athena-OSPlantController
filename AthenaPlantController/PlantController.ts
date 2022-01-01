@@ -17,6 +17,7 @@ import { ItemFactory } from '../../server/systems/item';
 import { PLANTCONTROLLER_ITEMS, seeds } from './src/server-items';
 import { playerFuncs } from '../../server/extensions/Player';
 import { Item } from '../../shared/interfaces/item';
+import { ANIMATION_FLAGS } from '../../shared/flags/animationFlags';
 
 const result = { id: '' };
 let textLabel: string;
@@ -109,9 +110,7 @@ export class PlantController implements IPlants {
      * @returns None
      */
     private static async createSeedingInteraction(player: alt.Player, data: IPlants) {
-        seeds.forEach(async (seed, i) => {
-            const itemToSeed = await ItemFactory.get(seed.name);
-            const hasSeeds = playerFuncs.inventory.isInInventory(player, { name: seed.name });
+        if (!data.data.seeds) {
             InteractionController.add({
                 type: 'PlantController',
                 identifier: JSON.stringify(data),
@@ -120,36 +119,66 @@ export class PlantController implements IPlants {
                 disableMarker: true,
                 range: PLANTCONTROLLER_SETTINGS.interactionRange,
                 callback: () => {
-                    if (!hasSeeds) return;
-                    if (player.data.inventory[hasSeeds.index].quantity <= 0 || !hasSeeds) {
-                        playerFuncs.emit.notification(player, `You need Seeds to do this.`);
-                    } else {
-                        if (
-                            PLANTCONTROLLER_ANIMATIONS.seedingAnimName != '' &&
-                            PLANTCONTROLLER_ANIMATIONS.seedingAnimDict != ''
-                        ) {
-                            alt.setTimeout(() => {
-                                data.data.seeds = true;
-                                data.data.state = PLANTCONTROLLER_TRANSLATIONS.fertilizerRequired;
-                                data.data.type = itemToSeed.data.type;
-                                data.data.variety = itemToSeed.data.variety;
-                                this.updatePlant(data._id, data);
-                                InteractionController.remove('PlantController', JSON.stringify(data));
-                                player.data.inventory[hasSeeds.index].quantity - 1;
-                                this.createFertilizingInteraction(player, data);
-                            }, PLANTCONTROLLER_ANIMATIONS.seedingAnimDuration);
-                        } else {
-                            data.data.seeds = true;
-                            data.data.state = PLANTCONTROLLER_TRANSLATIONS.fertilizerRequired;
-                            this.updatePlant(data._id, data);
-                            InteractionController.remove('PlantController', JSON.stringify(data));
-                            player.data.inventory[hasSeeds.index].quantity - 1;
-                            this.createFertilizingInteraction(player, data);
+                    seeds.forEach(async (seed, i) => {
+                        const itemToSeed = await ItemFactory.get(seed.name);
+                        const hasSeeds = playerFuncs.inventory.isInInventory(player, { name: itemToSeed.name });
+                        if (hasSeeds) {
+                            if (hasSeeds.index === 0) {
+                                if (
+                                    PLANTCONTROLLER_ANIMATIONS.seedingAnimName != 'default' &&
+                                    PLANTCONTROLLER_ANIMATIONS.seedingAnimDict != 'default'
+                                ) {
+                                    playerFuncs.emit.animation(
+                                        player,
+                                        PLANTCONTROLLER_ANIMATIONS.seedingAnimDict,
+                                        PLANTCONTROLLER_ANIMATIONS.seedingAnimName,
+                                        ANIMATION_FLAGS.NORMAL,
+                                        PLANTCONTROLLER_ANIMATIONS.seedingAnimDuration,
+                                    );
+                                    alt.setTimeout(() => {
+                                        data.data.seeds = true;
+                                        data.data.state = PLANTCONTROLLER_TRANSLATIONS.fertilizerRequired;
+                                        data.data.type = itemToSeed.data.type;
+                                        data.data.variety = itemToSeed.data.variety;
+                                        data.data.remaining = itemToSeed.data.time;
+                                        data.data.startTime = itemToSeed.data.time;
+                                        this.updatePlant(data._id, data);
+                                        InteractionController.remove('PlantController', JSON.stringify(data));
+                                        player.data.inventory[(hasSeeds.index = 0)].quantity = -1;
+                                        if (player.data.inventory[(hasSeeds.index = 0)].quantity <= 1) {
+                                            playerFuncs.inventory.findAndRemove(player, itemToSeed.name);
+                                        }
+                                        playerFuncs.save.field(player, 'inventory', player.data.inventory);
+                                        playerFuncs.sync.inventory(player);
+                                        this.createFertilizingInteraction(player, data);
+                                        return;
+                                    }, PLANTCONTROLLER_ANIMATIONS.seedingAnimDuration);
+                                } else {
+                                    data.data.seeds = true;
+                                    data.data.state = PLANTCONTROLLER_TRANSLATIONS.fertilizerRequired;
+                                    data.data.type = itemToSeed.data.type;
+                                    data.data.variety = itemToSeed.data.variety;
+                                    data.data.remaining = itemToSeed.data.time;
+                                    data.data.startTime = itemToSeed.data.time;
+                                    this.updatePlant(data._id, data);
+                                    InteractionController.remove('PlantController', JSON.stringify(data));
+                                    player.data.inventory[hasSeeds.index].quantity = -1;
+                                    if (player.data.inventory[hasSeeds.index].quantity <= 1) {
+                                        playerFuncs.inventory.findAndRemove(player, itemToSeed.name);
+                                    }
+                                    playerFuncs.save.field(player, 'inventory', player.data.inventory);
+                                    playerFuncs.sync.inventory(player);
+                                    this.createFertilizingInteraction(player, data);
+                                    return;
+                                }
+                            } else {
+                                return;
+                            }
                         }
-                    }
+                    });
                 },
             });
-        });
+        }
     }
 
     /**
@@ -159,33 +188,37 @@ export class PlantController implements IPlants {
      * @returns None
      */
     private static createFertilizingInteraction(player: alt.Player, data: IPlants) {
-        InteractionController.add({
-            type: 'PlantController',
-            identifier: JSON.stringify(data),
-            description: `${PLANTCONTROLLER_TRANSLATIONS.fertilizingInteraction}`,
-            position: data.position,
-            disableMarker: true,
-            range: PLANTCONTROLLER_SETTINGS.interactionRange,
-            callback: () => {
-                if (
-                    PLANTCONTROLLER_ANIMATIONS.fertilizingAnimName != '' &&
-                    PLANTCONTROLLER_ANIMATIONS.fertilizingAnimDict != ''
-                ) {
-                    alt.setTimeout(() => {
+        alt.log('CreateFertInteraction');
+        if (!data.data.fertilized) {
+            InteractionController.add({
+                type: 'PlantController',
+                identifier: JSON.stringify(data),
+                description: `${PLANTCONTROLLER_TRANSLATIONS.fertilizingInteraction}`,
+                position: data.position,
+                disableMarker: true,
+                range: PLANTCONTROLLER_SETTINGS.interactionRange,
+                callback: () => {
+                    if (
+                        PLANTCONTROLLER_ANIMATIONS.fertilizingAnimName != 'default' &&
+                        PLANTCONTROLLER_ANIMATIONS.fertilizingAnimDict != 'default'
+                    ) {
+                        alt.setTimeout(() => {
+                            data.data.fertilized = true;
+                            data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
+                            InteractionController.remove('PlantController', JSON.stringify(data));
+                            this.updatePlant(data._id, data);
+                            this.createWaterInteraction(player, data);
+                        }, PLANTCONTROLLER_ANIMATIONS.fertilizingAnimDuration);
+                    } else {
                         data.data.fertilized = true;
                         data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
-                        this.updatePlant(data._id, data);
                         InteractionController.remove('PlantController', JSON.stringify(data));
-                    }, PLANTCONTROLLER_ANIMATIONS.seedingAnimDuration);
-                } else {
-                    data.data.fertilized = true;
-                    data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
-                    this.updatePlant(data._id, data);
-                    InteractionController.remove('PlantController', JSON.stringify(data));
-                    this.createWaterInteraction(player, data);
-                }
-            },
-        });
+                        this.updatePlant(data._id, data);
+                        this.createWaterInteraction(player, data);
+                    }
+                },
+            });
+        }
     }
 
     /**
@@ -195,35 +228,48 @@ export class PlantController implements IPlants {
      * @returns None
      */
     private static async createWaterInteraction(player: alt.Player, data: IPlants) {
+        alt.log('Trying to create water inac');
+        InteractionController.remove('PlantController', JSON.stringify(data));
         const itemToWater = await ItemFactory.get(PLANTCONTROLLER_ITEMS.waterItemName);
         const hasWater = playerFuncs.inventory.isInInventory(player, { name: itemToWater.name });
-        InteractionController.add({
-            type: 'PlantController',
-            identifier: JSON.stringify(data),
-            description: `${PLANTCONTROLLER_TRANSLATIONS.waterInteraction}`,
-            position: data.position,
-            disableMarker: true,
-            range: PLANTCONTROLLER_SETTINGS.interactionRange,
-            callback: () => {
-                if (
-                    PLANTCONTROLLER_ANIMATIONS.fertilizingAnimName != '' &&
-                    PLANTCONTROLLER_ANIMATIONS.fertilizingAnimDict != ''
-                ) {
-                    alt.setTimeout(() => {
-                        data.data.fertilized = true;
+        if (data.data.seeds && data.data.fertilized && data.data.water <= 30) {
+            InteractionController.add({
+                type: 'PlantController',
+                identifier: JSON.stringify(data),
+                description: `${PLANTCONTROLLER_TRANSLATIONS.waterInteraction}`,
+                position: data.position,
+                disableMarker: true,
+                range: PLANTCONTROLLER_SETTINGS.interactionRange,
+                callback: () => {
+                    if (
+                        PLANTCONTROLLER_ANIMATIONS.waterAnimName != 'default' &&
+                        PLANTCONTROLLER_ANIMATIONS.waterAnimDict != 'default'
+                    ) {
+                        alt.setTimeout(() => {
+                            if (data.data.water >= 100) {
+                                data.data.water = 100;
+                                return;
+                            }
+                            data.data.water += itemToWater.data.amount;
+                            data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
+                            this.updatePlant(data._id, data);
+                            InteractionController.remove('PlantController', JSON.stringify(data));
+                        }, PLANTCONTROLLER_ANIMATIONS.waterAnimDuration);
+                    } else {
+                        if (data.data.water >= 100) {
+                            data.data.water = 100;
+                            return;
+                        }
+                        data.data.water += itemToWater.data.amount;
                         data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
                         this.updatePlant(data._id, data);
                         InteractionController.remove('PlantController', JSON.stringify(data));
-                    }, PLANTCONTROLLER_ANIMATIONS.seedingAnimDuration);
-                } else {
-                    data.data.water + itemToWater.data.amount;
-                    data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
-                    this.updatePlant(data._id, data);
-                    InteractionController.remove('PlantController', JSON.stringify(data));
-                    this.createWaterInteraction(player, data);
-                }
-            },
-        });
+                        this.createWaterInteraction(player, data);
+                        alt.log(`Water 100?`);
+                    }
+                },
+            });
+        }
     }
     /**
      * `removePlant` is a function that takes in a plant id and removes the plant from the database.
@@ -264,7 +310,34 @@ export class PlantController implements IPlants {
         return await Database.updatePartialData(id, updateDocument, PLANTCONTROLLER_DATABASE.collectionName);
     }
 
-    public static async loadPlants() {}
+    public static async loadPlants() {
+        const allPlants = await Database.fetchAllData<IPlants>(PLANTCONTROLLER_DATABASE.collectionName);
+        allPlants.forEach((data, i) => {
+            ServerObjectController.remove(data.shaIdentifier);
+            ServerObjectController.append({
+                pos: { x: data.position.x, y: data.position.y, z: data.position.z },
+                model: data.model,
+                uid: data.shaIdentifier,
+            });
+            ServerTextLabelController.append({
+                uid: data.shaIdentifier,
+                pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5 },
+                data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~n~~g~${data.data.state}~n~~n~~b~${data.data.water}% ~w~| ~g~${data.data.remaining}m`,
+            });
+        });
+        /*
+        ServerObjectController.remove(plant.shaIdentifier);
+        ServerObjectController.append({
+            pos: { x: plant.position.x, y: plant.position.y, z: plant.position.z },
+            model: plant.model,
+            uid: plant.shaIdentifier,
+        });
+        ServerTextLabelController.append({
+            uid: data.shaIdentifier,
+            pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5 },
+            data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~n~~g~${data.data.state}~n~~n~~b~${data.data.water}% ~w~| ~g~${data.data.remaining}m`,
+        }); */
+    }
     /**
      * Update all plants in the database.
      * @returns None
@@ -273,6 +346,8 @@ export class PlantController implements IPlants {
         const allPlants = await Database.fetchAllData<IPlants>(PLANTCONTROLLER_DATABASE.collectionName);
         allPlants.forEach((plant, i) => {
             if (plant.data.water > 0 && plant.data.remaining > 0) {
+                plant.data.seeds = plant.data.seeds;
+                plant.data.fertilized = plant.data.fertilized;
                 plant.data.water - 1;
                 plant.data.remaining - 1;
                 if (plant.data.startTime / 2) {
@@ -283,11 +358,11 @@ export class PlantController implements IPlants {
                         uid: plant.shaIdentifier,
                     });
                 }
-                this.updatePlant(plant._id, plant);
+                // this.updatePlant(plant._id, plant);
             }
-            if (plant.data.remaining === 0) {
+            if (plant.data.remaining === 0 && plant.data.harvestable === false) {
                 plant.data.harvestable = true;
-                this.updatePlant(plant._id, plant);
+                // this.updatePlant(plant._id, plant);
 
                 InteractionController.remove(`PlantController`, `${JSON.stringify(plant)}`);
                 ServerTextLabelController.remove(plant._id);
@@ -337,11 +412,19 @@ export class PlantController implements IPlants {
     private static refreshLabels(data: IPlants) {
         const removed = ServerTextLabelController.remove(data.shaIdentifier);
         if (removed) {
-            ServerTextLabelController.append({
-                uid: data.shaIdentifier,
-                pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5 },
-                data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~n~~g~${data.data.state}~n~~n~~b~${data.data.water}% ~w~| ~g~${data.data.remaining}m`,
-            });
+            if (!data.data.harvestable) {
+                ServerTextLabelController.append({
+                    uid: data.shaIdentifier,
+                    pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5 },
+                    data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~n~~g~${data.data.state}~n~~n~~b~${data.data.water}% ~w~| ~g~${data.data.remaining} minutes`,
+                });
+            } else {
+                ServerTextLabelController.append({
+                    uid: data.shaIdentifier,
+                    pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5 },
+                    data: `~g~${PLANTCONTROLLER_TRANSLATIONS.harvestable}`,
+                });
+            }
         } else {
             alt.log('PlantController - Seems like TextLabelController is broken again. Please consider reaching out.');
         }

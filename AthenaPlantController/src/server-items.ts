@@ -27,7 +27,10 @@ const potItem: Item = {
     dbName: PLANTCONTROLLER_ITEMS.potItemName
 };
 export const seeds = [
-    { name: 'LORDOG Seeds', description: 'Look how funny i am.', type: 'Indica', variety: 'LORDOG' }
+    { name: 'LORDOG Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'LORDOG', time: 360 },
+    { name: 'HorstOG Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'HorstOG', time: 280 },
+    { name: 'Lemon Seeds', description: 'Casual seeds for the casual grower.', type: 'Sativa', variety: 'Lemon Haze', time: 120, },
+    { name: 'Mango Seeds', description: 'Casual seeds for the casual grower.', type: 'Ruderalis', variety: 'Mango Kush', time: 60 }
 ]
 seeds.forEach(async (seed, i) => {
     const seedsItem: Item = {
@@ -41,6 +44,7 @@ seeds.forEach(async (seed, i) => {
         data: {
             type: seed.type, // Type of Outcome (=> Lemon Haze, Sativa)
             variety: seed.variety, // This Pot will just return "Lemon-Haze Buds",
+            time: seed.time
         },
         rarity: 3,
         dbName: seed.name
@@ -72,7 +76,7 @@ const waterItem: Item = {
     behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE,
     model: 'bkr_prop_jailer_keys_01a',
     data: {
-        amount: 10,
+        amount: 100,
     },
     rarity: 3,
     dbName: PLANTCONTROLLER_ITEMS.waterItemName
