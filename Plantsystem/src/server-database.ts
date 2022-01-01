@@ -4,7 +4,6 @@ import {
     ATHENA_PLANTCONTROLLER,
     PLANTCONTROLLER_DATABASE,
     PLANTCONTROLLER_SETTINGS,
-    PLANTCONTROLLER_SPOTS,
     PLANTCONTROLLER_TRANSLATIONS,
 } from '../index';
 import { ServerObjectController } from '../../../server/streamers/object';
@@ -16,6 +15,9 @@ import { ServerBlipController } from '../../../server/systems/blip';
 
 export async function loadPlants() {
     const plants = await Database.fetchAllData<IPlants>(PLANTCONTROLLER_DATABASE.collectionName);
+    alt.log(
+        `~lg~${ATHENA_PLANTCONTROLLER.name} ${ATHENA_PLANTCONTROLLER.version} | DATABASE | ==> found ${plants.length} plants to load.`,
+    );
     plants.forEach((data, i) => {
         ServerObjectController.append({
             uid: `PlantSystem-${data._id}`,
@@ -42,7 +44,7 @@ export async function loadPlants() {
                     data.data.state = 'Requires Fertilizer.';
 
                     InteractionController.remove(`PlantController`, `${data._id}`);
-                    PlantController.updatePlant(data._id, data);
+                    // PlantController.updatePlant(data._id, data);
                 },
             });
         } else if (!data.data.fertilized) {
@@ -58,14 +60,11 @@ export async function loadPlants() {
                     data.data.state = 'Requires Water.';
 
                     InteractionController.remove(`PlantController`, `${data._id}`);
-                    PlantController.updatePlant(data._id, data);
+                    // PlantController.updatePlant(data._id, data);
                 },
             });
         }
     });
-    alt.log(
-        `~lg~${ATHENA_PLANTCONTROLLER.name} ${ATHENA_PLANTCONTROLLER.version} | DATABASE | ==> found ${plants.length} plants to load.`,
-    );
 }
 
 export async function updatePlants() {
@@ -75,8 +74,17 @@ export async function updatePlants() {
             plant.data.water -= 1;
             plant.data.remaining -= 1;
             await Database.updatePartialData(plant._id, plant, PLANTCONTROLLER_DATABASE.collectionName);
-            PlantController.refreshLabels(plant, plant._id.toString());
-        } else {
+            // PlantController.refreshLabels(plant);
+        } else if(plant.data.remaining <= 0){
+            plant.data.harvestable = true;
+            plant.data.water = 0;
+            if(plant.data.remaining == 0) {
+                ServerTextLabelController.remove(plant._id.toString());
+                ServerTextLabelController.append({
+                    pos: { x: plant.position.x, y: plant.position.y, z: plant.position.z + 0.5},
+                    data: `~g~${PLANTCONTROLLER_TRANSLATIONS.harvestable}`
+                });
+            }
             await Database.updatePartialData(plant._id, plant, PLANTCONTROLLER_DATABASE.collectionName);
         }
     });
