@@ -1,12 +1,20 @@
 import Database from '@stuyk/ezmongodb';
 import * as alt from 'alt-server';
-import { ATHENA_PLANTCONTROLLER, PLANTCONTROLLER_DATABASE, PLANTCONTROLLER_SETTINGS, PLANTCONTROLLER_TRANSLATIONS } from './index';
+import {
+    ATHENA_PLANTCONTROLLER,
+    PLANTCONTROLLER_DATABASE,
+    PLANTCONTROLLER_SETTINGS,
+    PLANTCONTROLLER_TRANSLATIONS,
+} from './index';
 import { ServerTextLabelController } from '../../server/streamers/textlabel';
 import { ServerObjectController } from '../../server/streamers/object';
 import { DiscordController } from '../../server/systems/discord';
 import IPlants from './src/interfaces/IPlants';
+import { InteractionController } from '../../server/systems/interaction';
+import { TextLabel } from '../../shared/interfaces/textLabel';
 
 const result = { id: '' };
+let textLabel: string;
 
 export class PlantController implements IPlants {
     _id?: string;
@@ -74,9 +82,8 @@ export class PlantController implements IPlants {
         return isRemoved;
     }
 
-
     /**
-     * Finds the nearest plant.
+     * Returns id of nearest plant.
      * @param {alt.Player} player - alt.Player - The player that is looking for a plant.
      * @returns The ID of the nearest plant.
      */
@@ -114,7 +121,11 @@ export class PlantController implements IPlants {
         };
         await Database.updatePartialData(id, updateDocument, PLANTCONTROLLER_DATABASE.collectionName);
     }
-
+    /**
+     * Update all plants in the database.
+     * @returns None
+     */
+    static async updatePlants() {}
     /**
      * Send a message to the Discord channel specified in the config.
      * @param {string} msg - The message to send to the channel.
@@ -134,24 +145,27 @@ export class PlantController implements IPlants {
      * @param {IPlants} data - IPlants
      * @returns None
      */
-    static async buildObject(data: IPlants) {
+    static async buildObject(data: IPlants, object: string) {
+        if(!object) {
+            alt.log(`Missing Object.`);
+        }
         ServerObjectController.append({
             pos: data.position as alt.Vector3,
-            model: PLANTCONTROLLER_SETTINGS.smallPot,
+            model: object,
             uid: `PlantController-${data._id}`,
         });
     }
 
-/**
- * It removes the label from the screen, then re-adds it.
- * @param {IPlants} data - IPlants
- * @returns None
- */
-    static refreshLabels(data: IPlants) {
-        const removed = ServerTextLabelController.remove(data._id);
+    /**
+     * It removes the text label from the screen, then re-adds it.
+     * @param {IPlants} data - IPlants
+     * @returns None
+     */
+    static refreshLabels(data: IPlants, plantId: string) {
+        const removed = ServerTextLabelController.remove(plantId);
         if (removed) {
             ServerTextLabelController.append({
-                uid: data._id,
+                uid: plantId,
                 pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5 },
                 data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~n~~g~${data.data.state}~n~~n~~b~${data.data.water}% ~w~| ~g~${data.data.remaining}m`,
             });
@@ -160,105 +174,3 @@ export class PlantController implements IPlants {
         }
     }
 }
-
-
-/**
- *         const itemToSeed = await ItemFactory.get(PLANTCONTROLLER_ITEMS.seedsItemName.toString());
-        const itemToFertilize = await ItemFactory.get(PLANTCONTROLLER_ITEMS.fertilizerItemName.toString());
-        const itemToWater = await ItemFactory.get(PLANTCONTROLLER_ITEMS.waterItemName.toString());
-    
-        const seedsFound = playerFuncs.inventory.isInInventory(player, { name: itemToSeed.name.toString() });
-        const fertilizerFound = playerFuncs.inventory.isInInventory(player, {
-            name: itemToFertilize.name.toString(),
-        });
-        const waterFound = playerFuncs.inventory.isInInventory(player, { name: itemToWater.name.toString() });
-        PlantController.buildObject(data);
-        ServerTextLabelController.append({
-            uid: data._id,
-            pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5 },
-            data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~n~~g~${data.data.state}~n~~n~~b~${data.data.water}% ~w~| ~g~${data.data.remaining}m`,
-            maxDistance: PLANTCONTROLLER_SETTINGS.textLabelDistance,
-        });
-
-        if (!data.data.seeds) {
-            InteractionController.add({
-                identifier: `${data._id}`,
-                type: 'PlantController',
-                position: data.position as alt.Vector3,
-                description: PLANTCONTROLLER_TRANSLATIONS.seedingInteraction,
-                disableMarker: true,
-                range: PLANTCONTROLLER_SETTINGS.interactionRange,
-                callback: (player: alt.Player) => {
-                    if (!seedsFound) {
-                        playerFuncs.emit.notification(player, `No Seeds in Inventory.`);
-                        return;
-                    } else {
-                        if (player.data.inventory[seedsFound.index] <= 1) {
-                            playerFuncs.inventory.findAndRemove(player, itemToSeed.name);
-                        }
-                        data.data.seeds = true;
-                        data.data.state = PLANTCONTROLLER_TRANSLATIONS.fertilizerRequired;
-
-                        InteractionController.remove(`PlantController`, `${data._id}`);
-                        PlantController.updatePlant(data._id, data);
-                        PlantController.refreshLabels(data);
-                        InteractionController.add({
-                            identifier: `${data._id}`,
-                            type: 'PlantController',
-                            position: data.position as alt.Vector3,
-                            description: PLANTCONTROLLER_TRANSLATIONS.fertilizingInteraction,
-                            disableMarker: true,
-                            range: PLANTCONTROLLER_SETTINGS.interactionRange,
-                            callback: () => {
-                                if (!fertilizerFound) {
-                                    playerFuncs.emit.notification(player, `No Fertilizer in Inventory.`);
-                                    return;
-                                } else {
-                                    if (player.data.inventory[fertilizerFound.index] <= 1) {
-                                        playerFuncs.inventory.findAndRemove(player, itemToFertilize.name);
-                                    }
-                                    data.data.fertilized = true;
-                                    data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
-
-                                    InteractionController.remove(`PlantController`, `${data._id}`);
-                                    PlantController.updatePlant(data._id, data);
-                                    PlantController.refreshLabels(data);
-                                    InteractionController.add({
-                                        identifier: `${data._id}`,
-                                        type: 'PlantController',
-                                        position: data.position as alt.Vector3,
-                                        description: PLANTCONTROLLER_TRANSLATIONS.waterInteraction,
-                                        disableMarker: true,
-                                        range: PLANTCONTROLLER_SETTINGS.interactionRange,
-                                        callback: () => {
-                                            if (!waterFound) {
-                                                playerFuncs.emit.notification(player, `No Water in Inventory.`);
-                                                return;
-                                            } else {
-                                                if (player.data.inventory[waterFound.index] <= 1) {
-                                                    playerFuncs.inventory.findAndRemove(player, itemToWater.name);
-                                                }
-                                                if (data.data.water < 100) {
-                                                    data.data.water += 25;
-                                                } else if (data.data.water >= 100) {
-                                                    data.data.water = 100;
-                                                }
-                                                data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
-
-                                                InteractionController.remove(`PlantController`, `${data._id}`);
-                                                PlantController.updatePlant(data._id, data);
-                                                PlantController.refreshLabels(data);
-                                                player.data.inventory[waterFound.index].quantity - 1;
-                                            }
-                                        },
-                                    });
-                                    player.data.inventory[fertilizerFound.index].quantity - 1;
-                                }
-                            },
-                        });
-                        player.data.inventory[fertilizerFound.index].quantity - 1;
-                    }
-                },
-            });
-        }
- */

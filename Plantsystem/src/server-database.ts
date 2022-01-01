@@ -24,7 +24,7 @@ export async function loadPlants() {
         });
 
         ServerTextLabelController.append({
-            uid: data._id,
+            uid: data._id.toString(),
             pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5},
             data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~n~~g~${data.data.state}~n~~n~~b~${data.data.water}% ~w~| ~g~${data.data.remaining}m`,
         });
@@ -68,11 +68,16 @@ export async function loadPlants() {
     );
 }
 
-export async function updatePlants(data: IPlants) {
-    const plants = Database.fetchAllData<IPlants>(PLANTCONTROLLER_DATABASE.collectionName);
-    (await plants).forEach(async (plant, i) => {
-        await Database.updatePartialData(plant._id.toString(), data, PLANTCONTROLLER_DATABASE.collectionName);
+export async function updatePlants() {
+    const allPlants = await Database.fetchAllData<IPlants>(PLANTCONTROLLER_DATABASE.collectionName);
+    allPlants.forEach(async (plant, i) => {
+        if (plant.data.water > 0 && plant.data.remaining > 0) {
+            plant.data.water -= 1;
+            plant.data.remaining -= 1;
+            await Database.updatePartialData(plant._id, plant, PLANTCONTROLLER_DATABASE.collectionName);
+            PlantController.refreshLabels(plant, plant._id.toString());
+        } else {
+            await Database.updatePartialData(plant._id, plant, PLANTCONTROLLER_DATABASE.collectionName);
+        }
     });
 }
-
-export async function updateSinglePlant() {}

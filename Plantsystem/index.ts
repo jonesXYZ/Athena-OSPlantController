@@ -19,6 +19,8 @@ import { playerFuncs } from '../../server/extensions/Player';
 import { ItemFactory } from '../../server/systems/item';
 import { PLANTCONTROLLER_ITEMS } from './src/server-items';
 import { ANIMATION_FLAGS } from '../../shared/flags/animationFlags';
+import { ServerObjectController } from '../../server/streamers/object';
+import { setPlantInterval } from './src/server-functions';
 
 export const ATHENA_PLANTCONTROLLER = {
     name: 'PlantController',
@@ -106,10 +108,12 @@ alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, () => {
             uid: i.toString(),
         });
     });
+    setPlantInterval();
 });
 
 export async function plantAdd(
     player: alt.Player,
+    object: string,
     variety?: string,
     type?: string,
     remaining?: number,
@@ -129,7 +133,7 @@ export async function plantAdd(
             const waterFound = playerFuncs.inventory.isInInventory(player, { name: itemToWater.name.toString() });
 
             const plant = PlantController.addPlant(player, {
-                model: PLANTCONTROLLER_SETTINGS.smallPot,
+                model: object,
                 data: {
                     owner: player.data.name,
                     variety: variety,
@@ -144,7 +148,7 @@ export async function plantAdd(
                 position: { x: player.pos.x, y: player.pos.y, z: player.pos.z - 1 } as alt.Vector3,
             });
             plant.then(function (data) {
-                PlantController.buildObject(data);
+                PlantController.buildObject(data, object);
                 ServerTextLabelController.append({
                     uid: data._id,
                     pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5 },
@@ -177,7 +181,7 @@ export async function plantAdd(
                                     }
                                     InteractionController.remove(`PlantController`, `${data._id}`);
                                     PlantController.updatePlant(data._id, data);
-                                    PlantController.refreshLabels(data);
+                                    PlantController.refreshLabels(data, data._id.toString());
 
                                     InteractionController.add({
                                         identifier: `${data._id}`,
@@ -209,7 +213,7 @@ export async function plantAdd(
                                                     data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
                                                     InteractionController.remove(`PlantController`, `${data._id}`);
                                                     PlantController.updatePlant(data._id, data);
-                                                    PlantController.refreshLabels(data);
+                                                    PlantController.refreshLabels(data, data._id.toString());
 
                                                     InteractionController.add({
                                                         identifier: `${data._id}`,
@@ -255,7 +259,7 @@ export async function plantAdd(
                                                                         PLANTCONTROLLER_TRANSLATIONS.waterRequired;
 
                                                                     PlantController.updatePlant(data._id, data);
-                                                                    PlantController.refreshLabels(data);
+                                                                    PlantController.refreshLabels(data, data._id.toString());
 
                                                                     player.data.inventory[waterFound.index].quantity -
                                                                         1;

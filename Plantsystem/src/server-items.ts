@@ -68,6 +68,7 @@ const waterItem: Item = {
     behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE,
     model: 'bkr_prop_jailer_keys_01a',
     data: {
+        amount: 10,
     },
     rarity: 3,
     dbName: PLANTCONTROLLER_ITEMS.waterItemName
