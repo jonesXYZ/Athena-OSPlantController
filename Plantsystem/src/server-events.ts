@@ -23,6 +23,6 @@ alt.on('PlantController:Server:CreatePot', (player: alt.Player, data: Item) => {
             water: 0,
             harvestable: false,
         },
-        position: { x: player.pos.x, y: player.pos.y, z: player.pos.z - 1 } as alt.Vector3,
+        position: { x: player.pos.x + 1, y: player.pos.y, z: player.pos.z - 1 } as alt.Vector3,
     });
 });

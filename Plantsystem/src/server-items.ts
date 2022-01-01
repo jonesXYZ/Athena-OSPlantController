@@ -26,22 +26,28 @@ const potItem: Item = {
     rarity: 3,
     dbName: PLANTCONTROLLER_ITEMS.potItemName
 };
+export const seeds = [
+    { name: 'LORDOG Seeds', description: 'Look how funny i am.', type: 'Indica', variety: 'LORDOG' }
+]
+seeds.forEach(async (seed, i) => {
+    const seedsItem: Item = {
+        name: seed.name,
+        uuid: sha256(seed.name),
+        description: seed.description,
+        icon: 'crate',
+        quantity: 1,
+        behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE,
+        model: 'bkr_prop_jailer_keys_01a',
+        data: {
+            type: seed.type, // Type of Outcome (=> Lemon Haze, Sativa)
+            variety: seed.variety, // This Pot will just return "Lemon-Haze Buds",
+        },
+        rarity: 3,
+        dbName: seed.name
+    };
+    await ItemFactory.add(seedsItem);
+})
 
-const seedsItem: Item = {
-    name: PLANTCONTROLLER_ITEMS.seedsItemName,
-    uuid: sha256(PLANTCONTROLLER_ITEMS.seedsItemName),
-    description: 'Powerful Database Description',
-    icon: 'crate',
-    quantity: 1,
-    behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE,
-    model: 'bkr_prop_jailer_keys_01a',
-    data: {
-        type: 'Sativa', // Type of Outcome (=> Lemon Haze, Sativa)
-        variety: 'Lemon Haze', // This Pot will just return "Lemon-Haze Buds",
-    },
-    rarity: 3,
-    dbName: PLANTCONTROLLER_ITEMS.seedsItemName
-};
 
 const fertilizerItem: Item = {
     name: PLANTCONTROLLER_ITEMS.fertilizerItemName,
@@ -73,7 +79,7 @@ const waterItem: Item = {
 };
 
 const buds = [
-    { name: 'Lemon Haze Buds', description: 'Some funny Description', type: 'Sativa', variety: 'Lemon Haze', amount: 100 },
+    { name: 'Lemon Haze Buds', description: 'Result of harvesting Lemon Haze seeds.', type: 'Sativa', variety: 'Lemon Haze', amount: 100 },
 ]
 buds.forEach(async (bud, i) => {
     const budsItem: Item = {
@@ -95,6 +101,5 @@ buds.forEach(async (bud, i) => {
     await ItemFactory.add(budsItem);
 });
 await ItemFactory.add(potItem);
-await ItemFactory.add(seedsItem);
 await ItemFactory.add(fertilizerItem);
 await ItemFactory.add(waterItem);

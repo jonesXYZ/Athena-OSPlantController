@@ -14,8 +14,9 @@ import IPlants from './src/interfaces/IPlants';
 import { InteractionController } from '../../server/systems/interaction';
 import { sha256Random } from '../../server/utility/encryption';
 import { ItemFactory } from '../../server/systems/item';
-import { PLANTCONTROLLER_ITEMS } from './src/server-items';
+import { PLANTCONTROLLER_ITEMS, seeds } from './src/server-items';
 import { playerFuncs } from '../../server/extensions/Player';
+import { Item } from '../../shared/interfaces/item';
 
 const result = { id: '' };
 let textLabel: string;
@@ -86,7 +87,7 @@ export class PlantController implements IPlants {
         };
 
         ServerObjectController.append({
-            pos: data.position,
+            pos: { x: data.position.x, y: data.position.y, z: data.position.z },
             model: data.model,
             uid: data.shaIdentifier,
         });
@@ -108,42 +109,46 @@ export class PlantController implements IPlants {
      * @returns None
      */
     private static async createSeedingInteraction(player: alt.Player, data: IPlants) {
-        const itemToSeed = await ItemFactory.get(PLANTCONTROLLER_ITEMS.seedsItemName);
-        const hasSeeds = playerFuncs.inventory.isInInventory(player, { name: itemToSeed.name });
-
-        InteractionController.add({
-            type: 'PlantController',
-            identifier: JSON.stringify(data),
-            description: `${PLANTCONTROLLER_TRANSLATIONS.seedingInteraction}`,
-            position: data.position,
-            disableMarker: true,
-            range: PLANTCONTROLLER_SETTINGS.interactionRange,
-            callback: () => {
-                if (player.data.inventory[hasSeeds.index].quantity <= 0 || !hasSeeds) {
-                    playerFuncs.emit.notification(player, `You need Seeds to do this.`);
-                } else {
-                    if (
-                        PLANTCONTROLLER_ANIMATIONS.seedingAnimName != '' &&
-                        PLANTCONTROLLER_ANIMATIONS.seedingAnimDict != ''
-                    ) {
-                        alt.setTimeout(() => {
+        seeds.forEach(async (seed, i) => {
+            const itemToSeed = await ItemFactory.get(seed.name);
+            const hasSeeds = playerFuncs.inventory.isInInventory(player, { name: seed.name });
+            InteractionController.add({
+                type: 'PlantController',
+                identifier: JSON.stringify(data),
+                description: `${PLANTCONTROLLER_TRANSLATIONS.seedingInteraction}`,
+                position: { x: data.position.x, y: data.position.y, z: data.position.z },
+                disableMarker: true,
+                range: PLANTCONTROLLER_SETTINGS.interactionRange,
+                callback: () => {
+                    if (!hasSeeds) return;
+                    if (player.data.inventory[hasSeeds.index].quantity <= 0 || !hasSeeds) {
+                        playerFuncs.emit.notification(player, `You need Seeds to do this.`);
+                    } else {
+                        if (
+                            PLANTCONTROLLER_ANIMATIONS.seedingAnimName != '' &&
+                            PLANTCONTROLLER_ANIMATIONS.seedingAnimDict != ''
+                        ) {
+                            alt.setTimeout(() => {
+                                data.data.seeds = true;
+                                data.data.state = PLANTCONTROLLER_TRANSLATIONS.fertilizerRequired;
+                                data.data.type = itemToSeed.data.type;
+                                data.data.variety = itemToSeed.data.variety;
+                                this.updatePlant(data._id, data);
+                                InteractionController.remove('PlantController', JSON.stringify(data));
+                                player.data.inventory[hasSeeds.index].quantity - 1;
+                                this.createFertilizingInteraction(player, data);
+                            }, PLANTCONTROLLER_ANIMATIONS.seedingAnimDuration);
+                        } else {
                             data.data.seeds = true;
                             data.data.state = PLANTCONTROLLER_TRANSLATIONS.fertilizerRequired;
                             this.updatePlant(data._id, data);
                             InteractionController.remove('PlantController', JSON.stringify(data));
-                            player.data.inventory[hasSeeds.index].quantity -1;
+                            player.data.inventory[hasSeeds.index].quantity - 1;
                             this.createFertilizingInteraction(player, data);
-                        }, PLANTCONTROLLER_ANIMATIONS.seedingAnimDuration);
-                    } else {
-                        data.data.seeds = true;
-                        data.data.state = PLANTCONTROLLER_TRANSLATIONS.fertilizerRequired;
-                        this.updatePlant(data._id, data);
-                        InteractionController.remove('PlantController', JSON.stringify(data));
-                        player.data.inventory[hasSeeds.index].quantity -1;
-                        this.createFertilizingInteraction(player, data);
+                        }
                     }
-                }
-            },
+                },
+            });
         });
     }
 
@@ -191,7 +196,7 @@ export class PlantController implements IPlants {
      */
     private static async createWaterInteraction(player: alt.Player, data: IPlants) {
         const itemToWater = await ItemFactory.get(PLANTCONTROLLER_ITEMS.waterItemName);
-
+        const hasWater = playerFuncs.inventory.isInInventory(player, { name: itemToWater.name });
         InteractionController.add({
             type: 'PlantController',
             identifier: JSON.stringify(data),
@@ -259,9 +264,47 @@ export class PlantController implements IPlants {
         return await Database.updatePartialData(id, updateDocument, PLANTCONTROLLER_DATABASE.collectionName);
     }
 
+    public static async loadPlants() {}
+    /**
+     * Update all plants in the database.
+     * @returns None
+     */
     public static async updateAllPlants() {
         const allPlants = await Database.fetchAllData<IPlants>(PLANTCONTROLLER_DATABASE.collectionName);
-        allPlants.forEach((plant, i) => {});
+        allPlants.forEach((plant, i) => {
+            if (plant.data.water > 0 && plant.data.remaining > 0) {
+                plant.data.water - 1;
+                plant.data.remaining - 1;
+                if (plant.data.startTime / 2) {
+                    ServerObjectController.remove(plant.shaIdentifier);
+                    ServerObjectController.append({
+                        pos: { x: plant.position.x, y: plant.position.y, z: plant.position.z },
+                        model: plant.model,
+                        uid: plant.shaIdentifier,
+                    });
+                }
+                this.updatePlant(plant._id, plant);
+            }
+            if (plant.data.remaining === 0) {
+                plant.data.harvestable = true;
+                this.updatePlant(plant._id, plant);
+
+                InteractionController.remove(`PlantController`, `${JSON.stringify(plant)}`);
+                ServerTextLabelController.remove(plant._id);
+                ServerTextLabelController.append({
+                    uid: plant._id,
+                    data: `~g~${PLANTCONTROLLER_TRANSLATIONS.harvestable}`,
+                    pos: plant.position as alt.Vector3,
+                });
+
+                InteractionController.add({
+                    identifier: `${JSON.stringify(plant)}`,
+                    description: 'Harvest',
+                    position: plant.position as alt.Vector3,
+                    callback: () => {},
+                });
+            }
+        });
     }
 
     /**

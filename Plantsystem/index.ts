@@ -1,16 +1,17 @@
 import * as alt from 'alt-server';
 import Database from '@stuyk/ezmongodb';
 import { PluginSystem } from '../../server/systems/plugins';
+import { loadPlants } from './src/server-database';
+import { ServerBlipController } from '../../server/systems/blip';
+import { SYSTEM_EVENTS } from '../../shared/enums/system';
+import { PlantController } from './PlantController';
+
 import './PlantController';
 import './src/interfaces/IPlants';
 import './src/server-functions';
 import './src/server-database';
 import './src/server-events';
 import './src/server-items';
-import { loadPlants } from './src/server-database';
-import { ServerBlipController } from '../../server/systems/blip';
-import { SYSTEM_EVENTS } from '../../shared/enums/system';
-import { setPlantInterval } from './src/server-functions';
 
 export const ATHENA_PLANTCONTROLLER = {
     name: 'PlantController',
@@ -36,8 +37,8 @@ export const PLANTCONTROLLER_SETTINGS = {
 };
 
 export const PLANTCONTROLLER_ANIMATIONS = {
-    seedingAnimName: '',
-    seedingAnimDict: '',
+    seedingAnimName: 'amb@world_human_gardener_plant@male@base',
+    seedingAnimDict: 'base',
     seedingAnimDuration: 3000,
 
     fertilizingAnimName: '',
@@ -99,26 +100,5 @@ alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, () => {
             uid: i.toString(),
         });
     });
-    setPlantInterval();
+    PlantController.loadPlants();
 });
-
-export async function plantAdd(
-    player: alt.Player,
-) {
-    PLANTCONTROLLER_SPOTS.forEach(async (spot, i) => {
-        const isInRange = player.pos.isInRange(spot as alt.Vector3, PLANTCONTROLLER_SETTINGS.distanceToSpot);
-        if (isInRange) {
-        } else {
-            return;
-        }
-    });
-}
-
-/**
- *                ServerTextLabelController.append({
-                    uid: sha256(JSON.stringify(data)),
-                    pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5 },
-                    data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~n~~g~${data.data.state}~n~~n~~b~${data.data.water}% ~w~| ~g~${data.data.remaining}m`,
-                    maxDistance: PLANTCONTROLLER_SETTINGS.textLabelDistance,
-                });
- */
