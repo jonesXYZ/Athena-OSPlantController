@@ -1,14 +1,3 @@
-/**************************************************************************
- * The most configurable PlantSystem for the Athena Framework by Stuyk.   *
- * https://github.com/Stuyk/altv-athena                                   *
- * ---------------------------------------------------------------------- *
- * 						Written by Der Lord!                              *
- * ---------------------------------------------------------------------- *
- * Feel free to change whatever you need or dont want.                    *
- * Leave some feedback in the forums if you want to! I'd appreciate it.   *
- * Also feel free to open a PR / issue on my GitHub if you need something *
- * https://github.com/Booster1212/AthenaPlantsystem                       *
- **************************************************************************/
 import * as alt from 'alt-server';
 import Database from '@stuyk/ezmongodb';
 import { PluginSystem } from '../../server/systems/plugins';
@@ -31,8 +20,8 @@ import { ItemFactory } from '../../server/systems/item';
 import { PLANTCONTROLLER_ITEMS } from './src/server-items';
 
 export const ATHENA_PLANTCONTROLLER = {
-    name: 'PlantSystem',
-    version: 'v3.0',
+    name: 'PlantController',
+    version: 'v1.0',
     searchRange: 2, // Used to find nearest Plant-Pot.
     useDiscordLogs: false,
     discordChannel: 'someChannelId',
@@ -64,6 +53,10 @@ export const PLANTCONTROLLER_SPOTS: alt.Vector3[] = [
     { x: 2505.236328125, y: -2110.73095703125, z: 30.00033950805664 } as alt.Vector3,
 ];
 
+/**
+ * The `PLANTCONTROLLER_TRANSLATIONS` enum is used to store the text that will be displayed in the
+ * UI when the player interacts with a plant.
+ */
 export enum PLANTCONTROLLER_TRANSLATIONS {
     // Related to general
     notInRange = 'Not in range of a valid plant spot!',
@@ -96,26 +89,37 @@ alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, () => {
     });
 });
 
-ChatController.addCommand('Testplants', '/Testplants - Testing Plant System.', PERMISSIONS.ADMIN, plantAdd);
-export function plantAdd(player: alt.Player) {
+export async function plantAdd(
+    player: alt.Player,
+    variety?: string,
+    type?: string,
+    remaining?: number,
+    water?: number,
+) {
     PLANTCONTROLLER_SPOTS.forEach(async (spot, i) => {
-        if (!player.pos.isInRange(spot, PLANTCONTROLLER_SETTINGS.distanceToSpot)) {
-            // playerFuncs.emit.notification(player, `~r~${PLANTCONTROLLER_TRANSLATIONS.notInRange}`);
-            return;
-        } else {
+        const isInRange = player.pos.isInRange(spot as alt.Vector3, PLANTCONTROLLER_SETTINGS.distanceToSpot);
+        if (isInRange) {
             const itemToSeed = await ItemFactory.get(PLANTCONTROLLER_ITEMS.seedsItemName.toString());
+            const itemToFertilize = await ItemFactory.get(PLANTCONTROLLER_ITEMS.fertilizerItemName.toString());
+            const itemToWater = await ItemFactory.get(PLANTCONTROLLER_ITEMS.waterItemName.toString());
+
             const seedsFound = playerFuncs.inventory.isInInventory(player, { name: itemToSeed.name.toString() });
+            const fertilizerFound = playerFuncs.inventory.isInInventory(player, {
+                name: itemToFertilize.name.toString(),
+            });
+            const waterFound = playerFuncs.inventory.isInInventory(player, { name: itemToWater.name.toString() });
+
             const plant = PlantController.addPlant(player, {
                 model: PLANTCONTROLLER_SETTINGS.smallPot,
                 data: {
                     owner: player.data.name,
-                    variety: 'Sativa',
-                    type: 'Lemon Haze',
+                    variety: variety,
+                    type: type,
                     seeds: false,
                     fertilized: false,
                     state: PLANTCONTROLLER_TRANSLATIONS.seedsRequired,
-                    remaining: 60,
-                    water: 0,
+                    remaining: remaining,
+                    water: water,
                     harvestable: false,
                 },
                 position: { x: player.pos.x, y: player.pos.y, z: player.pos.z - 1 } as alt.Vector3,
@@ -141,16 +145,18 @@ export function plantAdd(player: alt.Player) {
                             if (!seedsFound) {
                                 playerFuncs.emit.notification(player, `No Seeds in Inventory.`);
                                 return;
-                            } else {
-                                if (player.data.inventory[seedsFound.index] <= 1) {
+                            } else if(seedsFound) {
+                                if (player.data.inventory[seedsFound.index] < 1) {
                                     playerFuncs.inventory.findAndRemove(player, itemToSeed.name);
+                                    return;
                                 }
                                 data.data.seeds = true;
                                 data.data.state = PLANTCONTROLLER_TRANSLATIONS.fertilizerRequired;
-    
+
                                 InteractionController.remove(`PlantController`, `${data._id}`);
                                 PlantController.updatePlant(data._id, data);
                                 PlantController.refreshLabels(data);
+                                
                                 InteractionController.add({
                                     identifier: `${data._id}`,
                                     type: 'PlantController',
@@ -158,14 +164,67 @@ export function plantAdd(player: alt.Player) {
                                     description: PLANTCONTROLLER_TRANSLATIONS.fertilizingInteraction,
                                     disableMarker: true,
                                     range: PLANTCONTROLLER_SETTINGS.interactionRange,
-                                    callback: () => {},
+                                    callback: () => {
+                                        if (!fertilizerFound) {
+                                            playerFuncs.emit.notification(player, `No Fertilizer in Inventory.`);
+                                            return;
+                                        } else if(fertilizerFound) {
+                                            if (player.data.inventory[fertilizerFound.index] < 1) {
+                                                playerFuncs.inventory.findAndRemove(player, itemToFertilize.name);
+                                                return;
+                                            }
+                                            data.data.fertilized = true;
+                                            data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
+
+                                            InteractionController.remove(`PlantController`, `${data._id}`);
+                                            PlantController.updatePlant(data._id, data);
+                                            PlantController.refreshLabels(data);
+
+                                            InteractionController.add({
+                                                identifier: `${data._id}`,
+                                                type: 'PlantController',
+                                                position: data.position as alt.Vector3,
+                                                description: PLANTCONTROLLER_TRANSLATIONS.waterInteraction,
+                                                disableMarker: true,
+                                                range: PLANTCONTROLLER_SETTINGS.interactionRange,
+                                                callback: () => {
+                                                    if (!waterFound) {
+                                                        playerFuncs.emit.notification(player, `No Water in Inventory.`);
+                                                        return;
+                                                    } else {
+                                                        if (player.data.inventory[waterFound.index] <= 1) {
+                                                            playerFuncs.inventory.findAndRemove(
+                                                                player,
+                                                                itemToWater.name,
+                                                            );
+                                                        }
+
+                                                        if (data.data.water < 100) {
+                                                            data.data.water += itemToWater.data.amount;
+                                                        } else if (data.data.water >= 100) {
+                                                            data.data.water = 100;
+                                                        }
+                                                        data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
+
+                                                        PlantController.updatePlant(data._id, data);
+                                                        PlantController.refreshLabels(data);
+
+                                                        player.data.inventory[waterFound.index].quantity - 1;
+                                                    }
+                                                },
+                                            });
+                                            player.data.inventory[fertilizerFound.index].quantity - 1;
+                                        }
+                                    },
                                 });
-                                player.data.inventory[seedsFound.index].quantity - 1;
+                                player.data.inventory[fertilizerFound.index].quantity - 1;
                             }
                         },
                     });
                 }
             });
+        } else {
+            return;
         }
     });
 }
