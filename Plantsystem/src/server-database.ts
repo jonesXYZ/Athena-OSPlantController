@@ -4,6 +4,7 @@ import {
     ATHENA_PLANTCONTROLLER,
     PLANTCONTROLLER_DATABASE,
     PLANTCONTROLLER_SETTINGS,
+    PLANTCONTROLLER_SPOTS,
     PLANTCONTROLLER_TRANSLATIONS,
 } from '../index';
 import { ServerObjectController } from '../../../server/streamers/object';
@@ -11,6 +12,7 @@ import { ServerTextLabelController } from '../../../server/streamers/textlabel';
 import { InteractionController } from '../../../server/systems/interaction';
 import { PlantController } from '../PlantController';
 import IPlants from './interfaces/IPlants';
+import { ServerBlipController } from '../../../server/systems/blip';
 
 export async function loadPlants() {
     const plants = await Database.fetchAllData<IPlants>(PLANTCONTROLLER_DATABASE.collectionName);

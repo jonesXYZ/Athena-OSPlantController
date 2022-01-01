@@ -47,9 +47,10 @@ export class PlantController implements IPlants {
     }
 
     /**
-     * @memberof PlantController
-     * @param player alt.Player
-     * @param IPlants IPlants Interface
+     * Adds a new plant to the database.
+     * @param {alt.Player} player - The player who is adding the plant.
+     * @param {IPlants} data - IPlants
+     * @returns The data of the plant that was added.
      */
     static async addPlant(player: alt.Player, data: IPlants): Promise<IPlants | null> {
         const plantData = await Database.insertData(data, PLANTCONTROLLER_DATABASE.collectionName, true);
@@ -58,8 +59,9 @@ export class PlantController implements IPlants {
     }
 
     /**
-     * @memberof PlantController
-     * @param id id which is needed to remove a plant from the database collection.
+     * `removePlant` is a function that takes in a plant id and removes the plant from the database.
+     * @param {string} id - string
+     * @returns A boolean value.
      */
     static async removePlant(id: string): Promise<Boolean | null> {
         const isRemoved = await Database.deleteById(id, PLANTCONTROLLER_DATABASE.collectionName);
@@ -67,18 +69,22 @@ export class PlantController implements IPlants {
     }
 
     /**
-     * @memberof PlantController
-     * @param player alt.Player
-     * @param id id which is needed to remove a plant from the database collection.
+     * `removeNextPlant` removes the next plant in the queue.
+     * @param {alt.Player} player - alt.Player - The player who is removing the plant.
+     * @param {string} id - string - The id of the plant to remove.
+     * @returns A boolean value.
      */
-    static async removeNextPlant(player: alt.Player, id: string) {
+    static async removeNextPlant(player: alt.Player, id: string): Promise<Boolean | null> {
         this.findNearestPlant(player);
-        await Database.deleteById(id, PLANTCONTROLLER_DATABASE.collectionName);
+        const isRemoved = await Database.deleteById(id, PLANTCONTROLLER_DATABASE.collectionName);
+        return isRemoved;
     }
+
+
     /**
-     * @memberof PlantController
-     * @param player alt.Player - Used to find the nearest plant.
-     * @returns plant_id as string - Useful for scripting purposes ;)
+     * Finds the nearest plant.
+     * @param {alt.Player} player - alt.Player - The player that is looking for a plant.
+     * @returns The ID of the nearest plant.
      */
     static async findNearestPlant(player: alt.Player): Promise<String> {
         const plants = await Database.fetchAllData<IPlants>(PLANTCONTROLLER_DATABASE.collectionName);
@@ -94,6 +100,12 @@ export class PlantController implements IPlants {
 
     static harvestPlant() {}
 
+    /**
+     * Update the plant's data in the database.
+     * @param {string} id - The id of the plant to update.
+     * @param {IPlants} data - IPlants
+     * @returns None
+     */
     static async updatePlant(id: string, data: IPlants) {
         const updateDocument: IPlants = {
             model: data.model,
@@ -112,9 +124,11 @@ export class PlantController implements IPlants {
         };
         await Database.updatePartialData(id, updateDocument, PLANTCONTROLLER_DATABASE.collectionName);
     }
+
     /**
-     * Used to set a PlantController Log to Discord, if enabled.
-     * @param msg
+     * Send a message to the Discord channel specified in the config.
+     * @param {string} msg - The message to send to the channel.
+     * @returns The plant object.
      */
     static log(msg: string) {
         if (ATHENA_PLANTCONTROLLER.useDiscordLogs) {
@@ -126,8 +140,9 @@ export class PlantController implements IPlants {
     }
 
     /**
-     * Used to build a new pot object, should be used with/after PlantController.addPlant(...);
-     * @param data IPlants Interface
+     * Cannot generate summary
+     * @param {IPlants} data - IPlants
+     * @returns None
      */
     static async buildObject(data: IPlants) {
         ServerObjectController.append({
@@ -146,7 +161,7 @@ export class PlantController implements IPlants {
         if (removed) {
             ServerTextLabelController.append({
                 uid: data._id,
-                pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5},
+                pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5 },
                 data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~n~~g~${data.data.state}~n~~n~~b~${data.data.water}% ~w~| ~g~${data.data.remaining}m`,
             });
         } else {

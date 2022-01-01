@@ -4,7 +4,7 @@ import { sha256 } from '../../../server/utility/encryption';
 import { ITEM_TYPE } from '../../../shared/enums/itemTypes';
 import { Item } from '../../../shared/interfaces/item';
 
-const PLANTCONTROLLER_ITEMS = {
+export const PLANTCONTROLLER_ITEMS = {
     fertilizerItemName: 'Fertilizer', // Change me before booting if you need to.
 	seedsItemName: 'Seeds', // Change me before booting if you need to.
 	waterItemName: 'Plantwater', // Change me before booting if you need to.
@@ -12,6 +12,20 @@ const PLANTCONTROLLER_ITEMS = {
 	budItemName: 'Buds', // Change me before booting if you need to.
 }
 
+const seedsItem: Item = {
+    name: PLANTCONTROLLER_ITEMS.seedsItemName,
+    uuid: sha256(PLANTCONTROLLER_ITEMS.seedsItemName),
+    description: 'Powerful Database Description',
+    icon: 'crate',
+    quantity: 1,
+    behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE,
+    model: 'bkr_prop_jailer_keys_01a',
+    data: {
+        event: 'PlantSystem:Server:SeedPot'
+    },
+    rarity: 3,
+    dbName: PLANTCONTROLLER_ITEMS.seedsItemName
+};
 const potItem: Item = {
     name: PLANTCONTROLLER_ITEMS.potItemName,
     uuid: sha256(PLANTCONTROLLER_ITEMS.potItemName),
@@ -27,4 +41,5 @@ const potItem: Item = {
     dbName: PLANTCONTROLLER_ITEMS.potItemName
 };
 
+await ItemFactory.add(seedsItem);
 await ItemFactory.add(potItem);
