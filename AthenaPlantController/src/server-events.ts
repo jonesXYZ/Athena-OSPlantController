@@ -12,7 +12,7 @@ player.
 alt.on('PlantController:Server:CreatePot', (player: alt.Player, data: Item) => {
     const vectorInFront = getVectorInFrontOfPlayer(player, 1);
     for(let i= 0; i < PLANTCONTROLLER_SPOTS.length;i++) {
-        if(player.pos.isInRange(PLANTCONTROLLER_SPOTS[i], 2)) {
+        if(player.pos.isInRange(PLANTCONTROLLER_SPOTS[i], PLANTCONTROLLER_SETTINGS.distanceToSpot)) {
             PlantController.addPlant(player, {
                 model: PLANTCONTROLLER_SETTINGS.smallPot,
                 shaIdentifier: PlantController.generateShaId(player),
