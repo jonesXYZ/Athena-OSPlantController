@@ -29,8 +29,9 @@ const potItem: Item = {
 export const seeds = [
     { name: 'LORDOG Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'LORDOG', time: 360 },
     { name: 'HorstOG Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'HorstOG', time: 280 },
-    { name: 'Lemon Seeds', description: 'Casual seeds for the casual grower.', type: 'Sativa', variety: 'Lemon Haze', time: 120, },
-    { name: 'Mango Seeds', description: 'Casual seeds for the casual grower.', type: 'Ruderalis', variety: 'Mango Kush', time: 60 }
+    { name: 'Purple Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'Purple Haze', time: 600 },
+    { name: 'Lemon Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Sativa', variety: 'Lemon Haze', time: 120, },
+    { name: 'Mango Kush Seeds', description: 'Casual seeds for the casual grower.', type: 'Ruderalis', variety: 'Mango Kush', time: 60 }
 ]
 seeds.forEach(async (seed, i) => {
     const seedsItem: Item = {

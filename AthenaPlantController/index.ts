@@ -8,6 +8,10 @@ import './PlantController';
 import './src/interfaces/IPlants';
 import './src/server-events';
 import './src/server-items';
+import { PlantController } from './PlantController';
+import { DiscordController } from '../../server/systems/discord';
+import ChatController from '../../server/systems/chat';
+import { PERMISSIONS } from '../../shared/flags/permissionFlags';
 
 export const ATHENA_PLANTCONTROLLER = {
     name: 'PlantController',
@@ -25,7 +29,7 @@ export const PLANTCONTROLLER_SETTINGS = {
     smallPot: 'bkr_prop_weed_01_small_01a', // LEAVE ME ALONE
     mediumPot: 'bkr_prop_weed_med_01a', // LEAVE ME ALONE
     largePot: 'bkr_prop_weed_lrg_01a', // LEAVE ME ALONE
-    updateInterval: 1000, // Used to set the timer's update Interval.
+    updateInterval: 10000, // Used to set the timer's update Interval.
     distanceToSpot: 10,
     interactionRange: 1,
     textLabelDistance: 3,
@@ -92,8 +96,11 @@ alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, () => {
             color: 2,
             text: PLANTCONTROLLER_SETTINGS.blipText,
             scale: 1,
-            uid: i.toString(),
+            uid: `Blip-${i}`,
         });
     });
-    // PlantController.loadPlants();
+    PlantController.loadPlants();
+    alt.setInterval(() => {
+        PlantController.updateAllPlants();
+    }, PLANTCONTROLLER_SETTINGS.updateInterval)
 });
