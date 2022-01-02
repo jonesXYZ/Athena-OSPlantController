@@ -28,7 +28,7 @@ const potItem: Item = {
 };
 export const seeds = [
     { name: 'Northern Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'Northern Haze', time: 10 },
-    { name: 'OG Kush Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'Kush OG', time: 10 },
+    { name: 'OG Kush Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'OG Kush', time: 10 },
     { name: 'Purple Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'Purple Haze', time: 10 },
     { name: 'Lemon Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Sativa', variety: 'Lemon Haze', time: 10, },
     { name: 'Mango Kush Seeds', description: 'Casual seeds for the casual grower.', type: 'Ruderalis', variety: 'Mango Kush', time: 10 }
@@ -40,7 +40,7 @@ seeds.forEach(async (seed, i) => {
         description: seed.description,
         icon: 'crate',
         quantity: 1,
-        behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.CAN_STACK,
+        behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.CAN_STACK | ITEM_TYPE.IS_TOOLBAR,
         model: 'bkr_prop_jailer_keys_01a',
         data: {
             type: seed.type, // Type of Outcome (=> Lemon Haze, Sativa)
@@ -84,7 +84,10 @@ const waterItem: Item = {
 
 export const buds = [
     { name: 'Northern Haze Buds', description: 'Result of harvesting Northern Haze seeds.', type: 'Indica', variety: 'Northern Haze', amount: 100 },
+    { name: 'OG Kush Buds', description: 'Result of harvesting OG Kush seeds.', type: 'Indica', variety: 'OG Kush', amount: 50 },
+    { name: 'Purple Haze Buds', description: 'Result of harvesting Purple Haze seeds.', type: 'Indica', variety: 'Purple Haze', amount: 100 },
     { name: 'Lemon Haze Buds', description: 'Result of harvesting Lemon Haze seeds.', type: 'Sativa', variety: 'Lemon Haze', amount: 100 },
+    { name: 'Mango Kush Buds', description: 'Result of harvesting Mango Kush seeds.', type: 'Ruderalis', variety: 'Mango Kush', amount: 100 }
 ]
 buds.forEach(async (bud, i) => {
     const budsItem: Item = {

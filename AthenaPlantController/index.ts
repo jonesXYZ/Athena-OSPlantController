@@ -13,7 +13,6 @@ import { PlantController } from './PlantController';
 export const ATHENA_PLANTCONTROLLER = {
     name: 'PlantController',
     version: 'v1.0',
-    searchRange: 2, // Used to find nearest Plant-Pot.
     useDiscordLogs: false,
     discordChannel: 'someChannelId',
 };

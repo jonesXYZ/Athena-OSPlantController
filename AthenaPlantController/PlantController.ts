@@ -100,7 +100,7 @@ export class PlantController implements IPlants {
             data: `~g~${data.data.state}`,
             maxDistance: PLANTCONTROLLER_SETTINGS.textLabelDistance,
         });
-        this.createSeedingInteraction(player, newPlant);
+        this.createSeedingInteraction(newPlant);
         return await Database.insertData(newPlant, PLANTCONTROLLER_DATABASE.collectionName, false);
     }
 
@@ -110,7 +110,7 @@ export class PlantController implements IPlants {
      * @param {IPlants} data - The data of the plant.
      * @returns None
      */
-    private static async createSeedingInteraction(player: alt.Player, data: IPlants) {
+    private static async createSeedingInteraction(data: IPlants) {
         if (!data.data.seeds) {
             InteractionController.add({
                 type: 'PlantController',
@@ -119,41 +119,23 @@ export class PlantController implements IPlants {
                 position: { x: data.position.x, y: data.position.y, z: data.position.z },
                 disableMarker: true,
                 range: PLANTCONTROLLER_SETTINGS.interactionRange,
-                callback: () => {
+                callback: (player: alt.Player) => {
                     seeds.forEach(async (seed, i) => {
                         const itemToSeed = await ItemFactory.get(seed.name);
-                        const hasSeeds = playerFuncs.inventory.isInInventory(player, { name: itemToSeed.name });
+                        const hasSeeds = playerFuncs.inventory.isInToolbar(player, { name: itemToSeed.name });
                         if (hasSeeds) {
-                            if (hasSeeds.index === 0) {
-                                if (
-                                    PLANTCONTROLLER_ANIMATIONS.seedingAnimName != 'default' &&
-                                    PLANTCONTROLLER_ANIMATIONS.seedingAnimDict != 'default'
-                                ) {
-                                    playerFuncs.emit.animation(
-                                        player,
-                                        PLANTCONTROLLER_ANIMATIONS.seedingAnimDict,
-                                        PLANTCONTROLLER_ANIMATIONS.seedingAnimName,
-                                        ANIMATION_FLAGS.NORMAL,
-                                        PLANTCONTROLLER_ANIMATIONS.seedingAnimDuration,
-                                    );
-                                    alt.setTimeout(() => {
-                                        data.data.seeds = true;
-                                        data.data.state = PLANTCONTROLLER_TRANSLATIONS.fertilizerRequired;
-                                        data.data.type = itemToSeed.data.type;
-                                        data.data.variety = itemToSeed.data.variety;
-                                        data.data.remaining = itemToSeed.data.time;
-                                        data.data.startTime = itemToSeed.data.time;
-                                        this.updatePlant(data._id, data);
-                                        player.data.inventory[hasSeeds.index].quantity = -1;
-                                        if (player.data.inventory[hasSeeds.index].quantity <= 1) {
-                                            playerFuncs.inventory.findAndRemove(player, itemToSeed.name);
-                                        }
-                                        playerFuncs.save.field(player, 'inventory', player.data.inventory);
-                                        playerFuncs.sync.inventory(player);
-                                        this.createFertilizingInteraction(player, data);
-                                        return;
-                                    }, PLANTCONTROLLER_ANIMATIONS.seedingAnimDuration);
-                                } else {
+                            if (
+                                PLANTCONTROLLER_ANIMATIONS.seedingAnimName != 'default' &&
+                                PLANTCONTROLLER_ANIMATIONS.seedingAnimDict != 'default'
+                            ) {
+                                playerFuncs.emit.animation(
+                                    player,
+                                    PLANTCONTROLLER_ANIMATIONS.seedingAnimDict,
+                                    PLANTCONTROLLER_ANIMATIONS.seedingAnimName,
+                                    ANIMATION_FLAGS.NORMAL,
+                                    PLANTCONTROLLER_ANIMATIONS.seedingAnimDuration,
+                                );
+                                alt.setTimeout(() => {
                                     data.data.seeds = true;
                                     data.data.state = PLANTCONTROLLER_TRANSLATIONS.fertilizerRequired;
                                     data.data.type = itemToSeed.data.type;
@@ -161,16 +143,33 @@ export class PlantController implements IPlants {
                                     data.data.remaining = itemToSeed.data.time;
                                     data.data.startTime = itemToSeed.data.time;
                                     this.updatePlant(data._id, data);
-                                    player.data.inventory[hasSeeds.index].quantity = -1;
-                                    if (player.data.inventory[hasSeeds.index].quantity <= 1) {
-                                        playerFuncs.inventory.findAndRemove(player, itemToSeed.name);
+                                    player.data.toolbar[hasSeeds.index].quantity -= 1;
+                                    if (player.data.toolbar[hasSeeds.index].quantity <= 1) {
+                                        playerFuncs.inventory.toolbarRemove(player, hasSeeds.index);
                                     }
-                                    playerFuncs.save.field(player, 'inventory', player.data.inventory);
+                                    playerFuncs.save.field(player, 'toolbar', player.data.toolbar);
                                     playerFuncs.sync.inventory(player);
-                                    this.createFertilizingInteraction(player, data);
+                                    this.createFertilizingInteraction(data);
+                                    return;
+                                }, PLANTCONTROLLER_ANIMATIONS.seedingAnimDuration);
+                            } else {
+                                data.data.seeds = true;
+                                data.data.state = PLANTCONTROLLER_TRANSLATIONS.fertilizerRequired;
+                                data.data.type = itemToSeed.data.type;
+                                data.data.variety = itemToSeed.data.variety;
+                                data.data.remaining = itemToSeed.data.time;
+                                data.data.startTime = itemToSeed.data.time;
+                                this.updatePlant(data._id, data);
+                                player.data.toolbar[hasSeeds.index].quantity -= 1;
+                                playerFuncs.save.field(player, 'toolbar', player.data.toolbar);
+                                playerFuncs.sync.inventory(player);
+                                if (player.data.toolbar[hasSeeds.index].quantity == 1) {
+                                    playerFuncs.inventory.toolbarRemove(player, hasSeeds.index);
+                                    playerFuncs.save.field(player, 'toolbar', player.data.toolbar);
+                                    playerFuncs.sync.inventory(player);
                                     return;
                                 }
-                            } else {
+                                this.createFertilizingInteraction(data);
                                 return;
                             }
                         }
@@ -186,7 +185,7 @@ export class PlantController implements IPlants {
      * @param {IPlants} data - The data of the plant.
      * @returns None
      */
-    private static createFertilizingInteraction(player: alt.Player, data: IPlants) {
+    private static async createFertilizingInteraction(data: IPlants) {
         this.removeInteraction(data);
         if (!data.data.fertilized) {
             InteractionController.add({
@@ -196,29 +195,45 @@ export class PlantController implements IPlants {
                 position: data.position,
                 disableMarker: true,
                 range: PLANTCONTROLLER_SETTINGS.interactionRange,
-                callback: () => {
-                    if (
-                        PLANTCONTROLLER_ANIMATIONS.fertilizingAnimName != 'default' &&
-                        PLANTCONTROLLER_ANIMATIONS.fertilizingAnimDict != 'default'
-                    ) {
-                        playerFuncs.emit.animation(
-                            player,
-                            PLANTCONTROLLER_ANIMATIONS.fertilizingAnimDict,
-                            PLANTCONTROLLER_ANIMATIONS.fertilizingAnimName,
-                            ANIMATION_FLAGS.NORMAL,
-                            PLANTCONTROLLER_ANIMATIONS.fertilizingAnimDuration,
-                        );
-                        alt.setTimeout(() => {
+                callback: async (player: alt.Player) => {
+                    const fertilizerItem = await ItemFactory.get(PLANTCONTROLLER_ITEMS.fertilizerItemName);
+                    const hasFertilizer = playerFuncs.inventory.isInInventory(player, { name: fertilizerItem.name });
+                    if (hasFertilizer) {
+                        if (
+                            PLANTCONTROLLER_ANIMATIONS.fertilizingAnimName != 'default' &&
+                            PLANTCONTROLLER_ANIMATIONS.fertilizingAnimDict != 'default'
+                        ) {
+                            playerFuncs.emit.animation(
+                                player,
+                                PLANTCONTROLLER_ANIMATIONS.fertilizingAnimDict,
+                                PLANTCONTROLLER_ANIMATIONS.fertilizingAnimName,
+                                ANIMATION_FLAGS.NORMAL,
+                                PLANTCONTROLLER_ANIMATIONS.fertilizingAnimDuration,
+                            );
+                            alt.setTimeout(() => {
+                                data.data.fertilized = true;
+                                data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
+                                this.updatePlant(data._id, data);
+                                this.createWaterInteraction(data);
+                                player.data.inventory[hasFertilizer.index].quantity -= 1;
+                                if (player.data.inventory[hasFertilizer.index].quantity <= 1) {
+                                    playerFuncs.inventory.findAndRemove(player, fertilizerItem.name);
+                                }
+                                playerFuncs.save.field(player, 'inventory', player.data.inventory);
+                                playerFuncs.sync.inventory(player);
+                            }, PLANTCONTROLLER_ANIMATIONS.fertilizingAnimDuration);
+                        } else {
                             data.data.fertilized = true;
                             data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
                             this.updatePlant(data._id, data);
                             this.createWaterInteraction(data);
-                        }, PLANTCONTROLLER_ANIMATIONS.fertilizingAnimDuration);
-                    } else {
-                        data.data.fertilized = true;
-                        data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
-                        this.updatePlant(data._id, data);
-                        this.createWaterInteraction(data);
+                            if (player.data.inventory[hasFertilizer.index].quantity <= 1) {
+                                playerFuncs.inventory.findAndRemove(player, fertilizerItem.name);
+                            }
+                            player.data.inventory[hasFertilizer.index].quantity -= 1;
+                            playerFuncs.save.field(player, 'inventory', player.data.inventory);
+                            playerFuncs.sync.inventory(player);
+                        }
                     }
                 },
             });
@@ -244,12 +259,40 @@ export class PlantController implements IPlants {
                 callback: async (player: alt.Player) => {
                     const itemToWater = await ItemFactory.get(PLANTCONTROLLER_ITEMS.waterItemName);
                     const hasWater = playerFuncs.inventory.isInInventory(player, { name: itemToWater.name });
-                    if (
-                        PLANTCONTROLLER_ANIMATIONS.waterAnimName != 'default' &&
-                        PLANTCONTROLLER_ANIMATIONS.waterAnimDict != 'default'
-                    ) {
-                        playerFuncs.emit.animation(player, PLANTCONTROLLER_ANIMATIONS.waterAnimDict, PLANTCONTROLLER_ANIMATIONS.waterAnimName, ANIMATION_FLAGS.NORMAL, PLANTCONTROLLER_ANIMATIONS.waterAnimDuration);
-                        alt.setTimeout(() => {
+                    if (hasWater) {
+                        if (
+                            PLANTCONTROLLER_ANIMATIONS.waterAnimName != 'default' &&
+                            PLANTCONTROLLER_ANIMATIONS.waterAnimDict != 'default'
+                        ) {
+                            playerFuncs.emit.animation(
+                                player,
+                                PLANTCONTROLLER_ANIMATIONS.waterAnimDict,
+                                PLANTCONTROLLER_ANIMATIONS.waterAnimName,
+                                ANIMATION_FLAGS.NORMAL,
+                                PLANTCONTROLLER_ANIMATIONS.waterAnimDuration,
+                            );
+                            alt.setTimeout(() => {
+                                player.data.inventory[hasWater.index].quantity -= 1;
+                                if (player.data.inventory[hasWater.index].quantity <= 1) {
+                                    playerFuncs.inventory.findAndRemove(player, itemToWater.name);
+                                }
+                                playerFuncs.save.field(player, 'inventory', player.data.inventory);
+                                playerFuncs.sync.inventory(player);
+                                if (data.data.water >= 100) {
+                                    data.data.water = 100;
+                                    return;
+                                }
+                                data.data.water += itemToWater.data.amount;
+                                data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
+                                this.updatePlant(data._id, data);
+                            }, PLANTCONTROLLER_ANIMATIONS.waterAnimDuration);
+                        } else {
+                            player.data.inventory[hasWater.index].quantity -= 1;
+                            if (player.data.inventory[hasWater.index].quantity <= 1) {
+                                playerFuncs.inventory.findAndRemove(player, itemToWater.name);
+                            }
+                            playerFuncs.save.field(player, 'inventory', player.data.inventory);
+                            playerFuncs.sync.inventory(player);
                             if (data.data.water >= 100) {
                                 data.data.water = 100;
                                 return;
@@ -257,15 +300,7 @@ export class PlantController implements IPlants {
                             data.data.water += itemToWater.data.amount;
                             data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
                             this.updatePlant(data._id, data);
-                        }, PLANTCONTROLLER_ANIMATIONS.waterAnimDuration);
-                    } else {
-                        if (data.data.water >= 100) {
-                            data.data.water = 100;
-                            return;
                         }
-                        data.data.water += itemToWater.data.amount;
-                        data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
-                        this.updatePlant(data._id, data);
                     }
                     this.removeInteraction(data);
                 },
@@ -311,6 +346,10 @@ export class PlantController implements IPlants {
         return await Database.updatePartialData(id, updateDocument, PLANTCONTROLLER_DATABASE.collectionName);
     }
 
+    /**
+     * Load all plants from the database and append them to the server.
+     * @returns None
+     */
     public static async loadPlants() {
         const allPlants = await Database.fetchAllData<IPlants>(PLANTCONTROLLER_DATABASE.collectionName);
         allPlants.forEach((data, i) => {
@@ -320,6 +359,14 @@ export class PlantController implements IPlants {
                 model: data.model,
                 uid: data.shaIdentifier,
             });
+            if (!data.data.seeds) {
+                ServerTextLabelController.append({
+                    uid: data.shaIdentifier,
+                    pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5 },
+                    data: `~g~${PLANTCONTROLLER_TRANSLATIONS.seedsRequired}`,
+                });
+                this.createSeedingInteraction(data);
+            }
             if (!data.data.harvestable) {
                 ServerTextLabelController.append({
                     uid: data.shaIdentifier,
@@ -332,6 +379,13 @@ export class PlantController implements IPlants {
                     pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5 },
                     data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~g~${PLANTCONTROLLER_TRANSLATIONS.harvestable}`,
                 });
+                this.createHarvestInteraction(data);
+            }
+            if (data.data.seeds && !data.data.fertilized) {
+                this.createFertilizingInteraction(data);
+            }
+            if (data.data.fertilized && data.data.water === 0) {
+                this.createWaterInteraction(data);
             }
         });
     }
@@ -377,19 +431,42 @@ export class PlantController implements IPlants {
                         model: PLANTCONTROLLER_SETTINGS.largePot,
                         uid: plant.shaIdentifier,
                     });
+                    this.createHarvestInteraction(plant);
                 }
+                await Database.updatePartialData(plant._id, plant, PLANTCONTROLLER_DATABASE.collectionName);
+            }
+        });
+    }
 
-                InteractionController.add({
-                    type: 'PlantController',
-                    identifier: plant.shaIdentifier,
-                    description: 'Harvest',
-                    position: plant.position as alt.Vector3,
-                    callback: async (player: alt.Player) => {
-                        ServerTextLabelController.remove(plant.shaIdentifier);
-                        const emptySlot = playerFuncs.inventory.getFreeInventorySlot(player);
-                        ServerObjectController.remove(plant.shaIdentifier);
+    /**
+     * Creates a harvest interaction for the plant.
+     * @param {IPlants} data - IPlants
+     * @returns None
+     */
+    private static async createHarvestInteraction(data: IPlants) {
+        InteractionController.add({
+            type: 'PlantController',
+            identifier: data.shaIdentifier,
+            description: 'Harvest',
+            position: data.position as alt.Vector3,
+            callback: async (player: alt.Player) => {
+                const emptySlot = playerFuncs.inventory.getFreeInventorySlot(player);
+                if (
+                    PLANTCONTROLLER_ANIMATIONS.harvestAnimDict != '' &&
+                    PLANTCONTROLLER_ANIMATIONS.harvestAnimName != ''
+                ) {
+                    playerFuncs.emit.animation(
+                        player,
+                        PLANTCONTROLLER_ANIMATIONS.harvestAnimDict,
+                        PLANTCONTROLLER_ANIMATIONS.harvestAnimName,
+                        ANIMATION_FLAGS.NORMAL,
+                        PLANTCONTROLLER_ANIMATIONS.harvestAnimDuration,
+                    );
+                    alt.setTimeout(() => {
+                        ServerTextLabelController.remove(data.shaIdentifier);
+                        ServerObjectController.remove(data.shaIdentifier);
                         buds.forEach(async (bud, i) => {
-                            if (plant.data.variety === bud.variety) {
+                            if (data.data.variety === bud.variety) {
                                 const harvestedItem = await ItemFactory.get(bud.name);
                                 harvestedItem.quantity = harvestedItem.data.amount;
                                 playerFuncs.inventory.inventoryAdd(player, harvestedItem, emptySlot.slot);
@@ -397,15 +474,23 @@ export class PlantController implements IPlants {
                                 playerFuncs.sync.inventory(player);
                             }
                         });
-                        await Database.deleteById(plant._id, PLANTCONTROLLER_DATABASE.collectionName);
-                        this.removeInteraction(plant);
-                    },
-                });
-                await Database.updatePartialData(plant._id, plant, PLANTCONTROLLER_DATABASE.collectionName);
-            }
+                    }, PLANTCONTROLLER_ANIMATIONS.harvestAnimDuration);
+                } else {
+                    buds.forEach(async (bud, i) => {
+                        if (data.data.variety === bud.variety) {
+                            const harvestedItem = await ItemFactory.get(bud.name);
+                            harvestedItem.quantity = harvestedItem.data.amount;
+                            playerFuncs.inventory.inventoryAdd(player, harvestedItem, emptySlot.slot);
+                            playerFuncs.save.field(player, 'inventory', player.data.inventory);
+                            playerFuncs.sync.inventory(player);
+                        }
+                    });
+                }
+                await Database.deleteById(data._id, PLANTCONTROLLER_DATABASE.collectionName);
+                this.removeInteraction(data);
+            },
         });
     }
-
     /**
      * Send a message to the Discord channel specified in the config.
      * @param {string} msg - The message to send to the channel.
