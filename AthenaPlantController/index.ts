@@ -9,6 +9,11 @@ import './src/interfaces/IPlants';
 import './src/server-events';
 import './src/server-items';
 import { PlantController } from './PlantController';
+import { PERMISSIONS } from '../../shared/flags/permissionFlags';
+import ChatController from '../../server/systems/chat';
+import { MessageEmbed } from 'discord.js';
+import { playerFuncs } from '../../server/extensions/Player';
+import { DiscordController } from '../../server/systems/discord';
 
 export const ATHENA_PLANTCONTROLLER = {
     name: 'PlantController',

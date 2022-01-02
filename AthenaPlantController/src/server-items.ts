@@ -40,7 +40,6 @@ seeds.forEach(async (seed, i) => {
         icon: 'crate',
         quantity: 1,
         behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.CAN_STACK | ITEM_TYPE.IS_TOOLBAR,
-        model: 'bkr_prop_jailer_keys_01a',
         data: {
             type: seed.type, // Type of Outcome (=> Lemon Haze, Sativa)
             variety: seed.variety, // This Pot will just return "Lemon-Haze Buds",
