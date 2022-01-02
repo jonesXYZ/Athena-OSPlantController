@@ -1,7 +1,8 @@
 # Athena Framework - PlantController
 
 
-![Fichier 29mdpi](https://user-images.githubusercontent.com/82890183/147866518-ca690889-0a1a-4ac8-9831-54b3b762b1ec.png)
+![Fichier 29mdpi](https://user-images.githubusercontent.com/82890183/147866518-ca690889-0a1a-4ac8-9831-54b3b762b1ec.png#gh-dark-mode-only)
+![Fichier 30mdpi](https://user-images.githubusercontent.com/82890183/147870216-07b41f59-9844-430c-88c6-0c476d21e41c.png#gh-light-mode-only)
 
 ## Have you always wanted to be a weed gardener? This is your chance! 
 This plugin for the Athena Framework allows you to grow different strains with different times! 
@@ -25,6 +26,7 @@ import './AthenaPlantController/index';
 
 ## Setup Items
 - Be careful that you'll need same type & variety!
+- Seeds need to be in Toolbar Slot 0 atm!
 
 ```typescript
 // Seeds (Build a new Plant)
