@@ -9,9 +9,6 @@ import './src/interfaces/IPlants';
 import './src/server-events';
 import './src/server-items';
 import { PlantController } from './PlantController';
-import { DiscordController } from '../../server/systems/discord';
-import ChatController from '../../server/systems/chat';
-import { PERMISSIONS } from '../../shared/flags/permissionFlags';
 
 export const ATHENA_PLANTCONTROLLER = {
     name: 'PlantController',
@@ -29,28 +26,31 @@ export const PLANTCONTROLLER_SETTINGS = {
     smallPot: 'bkr_prop_weed_01_small_01a', // LEAVE ME ALONE
     mediumPot: 'bkr_prop_weed_med_01a', // LEAVE ME ALONE
     largePot: 'bkr_prop_weed_lrg_01a', // LEAVE ME ALONE
-    updateInterval: 10000, // Used to set the timer's update Interval.
+    updateInterval: 3000, // Used to set the timer's update Interval.
     distanceToSpot: 10,
     interactionRange: 1,
     textLabelDistance: 3,
-    blipText: '~g~PlantController',
 };
 
+// use 'default' to skip animations.
+// Example ->
+// seedingAnimName: 'default',
+// seedingAnimDict: 'default',
 export const PLANTCONTROLLER_ANIMATIONS = {
     seedingAnimName: 'base',
     seedingAnimDict: 'amb@world_human_gardener_plant@male@base',
     seedingAnimDuration: 3000,
 
-    fertilizingAnimName: 'default',
-    fertilizingAnimDict: 'default',
+    fertilizingAnimName: 'base',
+    fertilizingAnimDict: 'amb@world_human_gardener_plant@male@base',
     fertilizingAnimDuration: 3000,
 
-    waterAnimName: 'default',
-    waterAnimDict: 'default',
+    waterAnimName: 'base',
+    waterAnimDict: 'amb@world_human_gardener_plant@male@base',
     waterAnimDuration: 3000,
 
-    harvestAnimName: 'default',
-    harvestAnimDict: 'default',
+    harvestAnimName: 'base',
+    harvestAnimDict: 'amb@world_human_gardener_plant@male@base',
     harvestAnimDuration: 3000,
 };
 
@@ -88,19 +88,20 @@ PluginSystem.registerPlugin(ATHENA_PLANTCONTROLLER.name, async () => {
 });
 
 alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, () => {
-    PLANTCONTROLLER_SPOTS.forEach((spot, i) => {
+    for(let i = 0; i < PLANTCONTROLLER_SPOTS.length; i++)
+    {
         ServerBlipController.append({
-            pos: spot as alt.Vector3,
             shortRange: true,
             sprite: 469,
             color: 2,
-            text: PLANTCONTROLLER_SETTINGS.blipText,
+            text: 'Plant Spot',
             scale: 1,
+            pos: PLANTCONTROLLER_SPOTS[i],
             uid: `Blip-${i}`,
         });
-    });
+    }
     PlantController.loadPlants();
     alt.setInterval(() => {
         PlantController.updateAllPlants();
-    }, PLANTCONTROLLER_SETTINGS.updateInterval)
+    }, PLANTCONTROLLER_SETTINGS.updateInterval);
 });

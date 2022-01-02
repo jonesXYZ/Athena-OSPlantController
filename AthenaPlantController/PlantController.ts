@@ -14,7 +14,7 @@ import IPlants from './src/interfaces/IPlants';
 import { InteractionController } from '../../server/systems/interaction';
 import { sha256Random } from '../../server/utility/encryption';
 import { ItemFactory } from '../../server/systems/item';
-import { PLANTCONTROLLER_ITEMS, seeds } from './src/server-items';
+import { buds, PLANTCONTROLLER_ITEMS, seeds } from './src/server-items';
 import { playerFuncs } from '../../server/extensions/Player';
 import { Item } from '../../shared/interfaces/item';
 import { ANIMATION_FLAGS } from '../../shared/flags/animationFlags';
@@ -201,6 +201,13 @@ export class PlantController implements IPlants {
                         PLANTCONTROLLER_ANIMATIONS.fertilizingAnimName != 'default' &&
                         PLANTCONTROLLER_ANIMATIONS.fertilizingAnimDict != 'default'
                     ) {
+                        playerFuncs.emit.animation(
+                            player,
+                            PLANTCONTROLLER_ANIMATIONS.fertilizingAnimDict,
+                            PLANTCONTROLLER_ANIMATIONS.fertilizingAnimName,
+                            ANIMATION_FLAGS.NORMAL,
+                            PLANTCONTROLLER_ANIMATIONS.fertilizingAnimDuration,
+                        );
                         alt.setTimeout(() => {
                             data.data.fertilized = true;
                             data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
@@ -241,6 +248,7 @@ export class PlantController implements IPlants {
                         PLANTCONTROLLER_ANIMATIONS.waterAnimName != 'default' &&
                         PLANTCONTROLLER_ANIMATIONS.waterAnimDict != 'default'
                     ) {
+                        playerFuncs.emit.animation(player, PLANTCONTROLLER_ANIMATIONS.waterAnimDict, PLANTCONTROLLER_ANIMATIONS.waterAnimName, ANIMATION_FLAGS.NORMAL, PLANTCONTROLLER_ANIMATIONS.waterAnimDuration);
                         alt.setTimeout(() => {
                             if (data.data.water >= 100) {
                                 data.data.water = 100;
@@ -372,10 +380,26 @@ export class PlantController implements IPlants {
                 }
 
                 InteractionController.add({
+                    type: 'PlantController',
                     identifier: plant.shaIdentifier,
                     description: 'Harvest',
                     position: plant.position as alt.Vector3,
-                    callback: () => {},
+                    callback: async (player: alt.Player) => {
+                        ServerTextLabelController.remove(plant.shaIdentifier);
+                        const emptySlot = playerFuncs.inventory.getFreeInventorySlot(player);
+                        ServerObjectController.remove(plant.shaIdentifier);
+                        buds.forEach(async (bud, i) => {
+                            if (plant.data.variety === bud.variety) {
+                                const harvestedItem = await ItemFactory.get(bud.name);
+                                harvestedItem.quantity = harvestedItem.data.amount;
+                                playerFuncs.inventory.inventoryAdd(player, harvestedItem, emptySlot.slot);
+                                playerFuncs.save.field(player, 'inventory', player.data.inventory);
+                                playerFuncs.sync.inventory(player);
+                            }
+                        });
+                        await Database.deleteById(plant._id, PLANTCONTROLLER_DATABASE.collectionName);
+                        this.removeInteraction(plant);
+                    },
                 });
                 await Database.updatePartialData(plant._id, plant, PLANTCONTROLLER_DATABASE.collectionName);
             }

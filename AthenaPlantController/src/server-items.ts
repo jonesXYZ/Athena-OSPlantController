@@ -17,7 +17,7 @@ const potItem: Item = {
     description: `PlantController - Some Description to show for debugging purposes.`,
     icon: 'crate',
     quantity: 1,
-    behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.CONSUMABLE,
+    behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.CONSUMABLE | ITEM_TYPE.CAN_STACK,
     model: 'bkr_prop_jailer_keys_01a',
     data: {
         event: 'PlantController:Server:CreatePot', // Server Event
@@ -27,11 +27,11 @@ const potItem: Item = {
     dbName: PLANTCONTROLLER_ITEMS.potItemName
 };
 export const seeds = [
-    { name: 'LORDOG Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'LORDOG', time: 360 },
-    { name: 'HorstOG Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'HorstOG', time: 280 },
-    { name: 'Purple Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'Purple Haze', time: 600 },
-    { name: 'Lemon Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Sativa', variety: 'Lemon Haze', time: 120, },
-    { name: 'Mango Kush Seeds', description: 'Casual seeds for the casual grower.', type: 'Ruderalis', variety: 'Mango Kush', time: 60 }
+    { name: 'Northern Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'Northern Haze', time: 10 },
+    { name: 'OG Kush Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'Kush OG', time: 10 },
+    { name: 'Purple Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'Purple Haze', time: 10 },
+    { name: 'Lemon Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Sativa', variety: 'Lemon Haze', time: 10, },
+    { name: 'Mango Kush Seeds', description: 'Casual seeds for the casual grower.', type: 'Ruderalis', variety: 'Mango Kush', time: 10 }
 ]
 seeds.forEach(async (seed, i) => {
     const seedsItem: Item = {
@@ -40,7 +40,7 @@ seeds.forEach(async (seed, i) => {
         description: seed.description,
         icon: 'crate',
         quantity: 1,
-        behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE,
+        behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.CAN_STACK,
         model: 'bkr_prop_jailer_keys_01a',
         data: {
             type: seed.type, // Type of Outcome (=> Lemon Haze, Sativa)
@@ -51,8 +51,7 @@ seeds.forEach(async (seed, i) => {
         dbName: seed.name
     };
     await ItemFactory.add(seedsItem);
-})
-
+});
 
 const fertilizerItem: Item = {
     name: PLANTCONTROLLER_ITEMS.fertilizerItemName,
@@ -60,7 +59,7 @@ const fertilizerItem: Item = {
     description: 'Powerful Database Description',
     icon: 'crate',
     quantity: 1,
-    behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE,
+    behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.CAN_STACK,
     model: 'bkr_prop_jailer_keys_01a',
     data: {
     },
@@ -74,7 +73,7 @@ const waterItem: Item = {
     description: 'Powerful Database Description',
     icon: 'crate',
     quantity: 1,
-    behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE,
+    behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.CAN_STACK,
     model: 'bkr_prop_jailer_keys_01a',
     data: {
         amount: 100,
@@ -83,7 +82,8 @@ const waterItem: Item = {
     dbName: PLANTCONTROLLER_ITEMS.waterItemName
 };
 
-const buds = [
+export const buds = [
+    { name: 'Northern Haze Buds', description: 'Result of harvesting Northern Haze seeds.', type: 'Indica', variety: 'Northern Haze', amount: 100 },
     { name: 'Lemon Haze Buds', description: 'Result of harvesting Lemon Haze seeds.', type: 'Sativa', variety: 'Lemon Haze', amount: 100 },
 ]
 buds.forEach(async (bud, i) => {
@@ -93,7 +93,7 @@ buds.forEach(async (bud, i) => {
         description: bud.description,
         icon: 'crate',
         quantity: 1,
-        behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE,
+        behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.CAN_STACK,
         model: 'bkr_prop_jailer_keys_01a',
         data: {
             type: bud.type,
