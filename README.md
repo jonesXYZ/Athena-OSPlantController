@@ -1,139 +1,159 @@
-# Plantsystem v2 for Athena Framework (GTA V) by Der Lord!
+# Athena Framework - PlantController
 
-![unknown](https://user-images.githubusercontent.com/82890183/131876685-13775cce-d8ee-4eb5-b95e-b3ad8520a3cf.png)
 
-Good evening guys, i've decided to rewrite the plugins codebase as a whole. Thanks especially to Stuyk for pointing out about objects.
+![Fichier 29mdpi](https://user-images.githubusercontent.com/82890183/147866518-ca690889-0a1a-4ac8-9831-54b3b762b1ec.png)
 
-So here we go again :)
+## Have you always wanted to be a weed gardener? This is your chance! 
+This plugin for the Athena Framework allows you to grow different strains with different times! 
+The harvest of your plant is freely determinable, depending on how long your plant needs to grow.
 
-# Features:
-* Now fully translateable in your native language
-* Now based on Athena's InteractionController
-* Now you can still plant weed pots by Toolbar but now for fertilizing, watering and so on you'll only need to have stuff in inventory.
-* Now with maximum Plant support for each player individually
-* Customize scenarios & the time for each.
-* Customize the updateInterval & also the states of the plants.
-* Customize the range to a spot players can have
-* Customizie the outcome of the plant harvesting (only tried randomized outcome there so far)
-* Customize the water loss per minute .. and a lot more.
+## Features
+- Different varieties with different adjustable yields!
+- Sow, fertilize, water and harvest your plants!
+- Adjustable according to your wishes!
+- Create as many plant spots as you like!
+- Custom animations for sowing, fertilizing, watering and harvesting!
 
-### Plantsystem - SETUP
-* This is a serverside plugin! It has to be added in your local athena repository here: (/src/core/plugins/Plantsystem)
-* Go to your .env file inside of your local Athena repository and add "MONGO_COLLECTIONS=plants" without the quotes.
-* Configuration Options can be found below.
-* Setup should be pretty much the same actually.
-
-### Default Settings
-
-You can always find the default settings for this plugin here.
+## Setup & Imports
+- Create a new folder called "AthenaPlantController" and drop stuff from this branch there.
+- Since this is an serverside plugin we just need to import the index.ts file.
+- Database and default items will be created on the first bootup of the Athena Framework.
 ```typescript
-import * as alt from 'alt-server';
-/**
- * An Array all the valid plant placing spots are going here.
- * Just press F1 Ingame with some administrative permissions, then press F8 and copy here and add "as alt.Vector3"
- * @type {alt.Vector3}
- * @memberof main
- */
-export const plantSpots: alt.Vector3[] = [
-	{ x: -1625.6290283203125, y: 3165.891357421875, z: 29.933713912963867 } as alt.Vector3
-	// { x: 0, y: 0, z: 0 } as alt.Vector3, .. More Positions.
-];
-
-// Translate whatever you need here to your native language
-
-export enum Translations {
-	STATE = 'State:',
-	WATER = 'Water:',
-	TIME = 'Time:',
-	FERTILIZER = 'Fertilizer:',
-	HARVESTABLE = 'Harvestable:',
-
-	NO_SEEDS_IN_INVENTORY = 'You do not have any weedseeds in your inventory',
-	NO_FERTILIZER_IN_INVENTORY = 'You do not have any plant fertilizer in your inventory',
-	NO_PLANTWATER_IN_INVENTORY = 'You do not have any plant water in your inventory',
-
-	NOT_IN_RANGE_OF_SPOT = 'You are not in the range of a valid planting spot',
-	NOT_ALLOWED_TO_INTERACT = 'You are not allowed to interact with this plant.',
-	PLANT_SUCCESSFULLY_CREATED = 'Successfully created a plant.',
-
-	INTERACTION_PLACESEEDS = 'Place Weedseeds',
-	INTERACTION_FERTILIZE = 'Fertilize this plant',
-	INTERACTION_WATER = 'Water this plant',
-	INTERACTION_HARVEST = 'Harvest this plant',
-	waitTillWateringFinished = "Wait until you've finished the process of watering"
-}
-
-// Settings for the main.ts - file
-export const defaultSettings = {
-	plantSystemEnabled: true, // is the PlantSystem enabled? default: true
-	plantUpdateInterval: 1000, // updateInterval for all Plants? default: 60000 (1 Minute)
-	createBlips: true // will blips be created on the bootup of the Athena Framework? Maybe you want to make it harder to find some spots.
-};
-
-export const blipSettings = {
-	sprite: 469, // Sprite of the Spot Blips
-	color: 2, // Color of the Spot Blips
-	scale: 1, // Scale of the Blips
-	shortRange: true, // ShortRange - N/A idk have to look alt:V imagine insane emoji here. kekw.
-	text: 'Weed-Plant Spot' // Text for all generated Blips?
-};
-
-// Settings for the database.ts - file
-export const dbSettings = {
-	logsEnabled: true, // logsystem of this plantsystem enabled? default: false
-	useItems: true, // will player need items to place, fertilize, water plants? default: true - i'd suggest to keep this.
-
-	allowEveryoneToInteract: false, // can everyone harvest plant of anyone? default: false,
-	plantLimit: true, // plantLimit for players enabled? default: true
-	maximumAllowedPlants: 10, // maximumAllowedPlants for a player? default: 10
-
-	plantRequiredWaterToGrowh: 20, // Minium amount of water needed for the plant to grow. default: 20 (%)
-	plantWaterLossPerMinute: 0.25, // How much Water will this plant remove per minute?
-	destroyPlantsWithLowWater: false, // Will plants which result in zero water before finished be destroyed? Don't use for now. Not integrated.
-
-	beginngStateText: 'Beginning...', // Text right after placing a pot.
-	plantBeginningState: 60, // This does not matter too much tbh.
-
-	mediumStateText: 'Growth...', // Text for the mediumState.
-	plantMediumState: 30, // At what state should the plant switch into "mediumState"? default: 30 (minutes).
-
-	endStateText: 'End of growth...', // Text for the endState.
-	plantEndState: 15, // At what state should the plant switch into "endState"? default: 15 (minutes).
-
-	harvestableText: 'Harvestable',
-
-	seedPlacingTime: 5000, // Time it takes to place a seed
-	seedPlacingScenario: 'WORLD_HUMAN_GARDENER_PLANT', // scenario for placing Plants
-
-	wateringTime: 5000, // Time it takes to water a plant
-	wateringScenario: 'WORLD_HUMAN_GARDENER_LEAF_BLOWER', // scenario for watering Plants
-
-	fertilizeTime: 5000, // Time it takes to fertilize a plant
-	fertilizeScenario: 'WORLD_HUMAN_GARDENER_LEAF_BLOWER', // scenario for fertilizing Plants
-
-	harvestTime: 5000, // Time it takes to harvest plant
-	harvestScenario: 'WORLD_HUMAN_GARDENER_PLANT', // scenario for harvesting Plants
-	randomizeHarvestOutcome: true,
-	minOutcome: 20,
-	maxOutcome: 40,
-
-	rangeToSpot: 20 // how far can a player be away from a plant spot and still plant a pot?
-};
-
-// DO NOT CHANGE THESE IF YOU DONT KNOW WHAT YOU ARE DOING HERE!
-export const db_plantObjects = {
-	small: 'bkr_prop_weed_01_small_01a',
-	medium: 'bkr_prop_weed_med_01a',
-	large: 'bkr_prop_weed_lrg_01a'
-};
+// src/core/plugins/import.ts ->
+import './AthenaPlantController/index';
 ```
 
-### Known Issues
-* None for now.
+## Setup Items
+- Be careful that you'll need same type & variety!
 
-If you want to contribute to Athena's Plantsystem Plugin feel free to open an issue (for Feature Request also) or a Pull Request if you think you fixed a bug or added some new features.
+```typescript
+// Seeds (Build a new Plant)
+export const seeds = [
+    { name: 'Northern Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'Northern Haze', time: 10 },
+    { name: 'OG Kush Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'OG Kush', time: 10 },
+    { name: 'Purple Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'Purple Haze', time: 10 },
+    { name: 'Lemon Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Sativa', variety: 'Lemon Haze', time: 10, },
+    { name: 'Mango Kush Seeds', description: 'Casual seeds for the casual grower.', type: 'Ruderalis', variety: 'Mango Kush', time: 10 }
+]
 
-If you want to leave some feedback, feel free to do so in the Athena-Framework Forums. You can also point out bugs there if you don't know how to create a git issue.
+// Buds (Harvesting a Plant)
+export const buds = [
+    { name: 'Northern Haze Buds', description: 'Result of harvesting Northern Haze seeds.', type: 'Indica', variety: 'Northern Haze', amount: 100 },
+    { name: 'OG Kush Buds', description: 'Result of harvesting OG Kush seeds.', type: 'Indica', variety: 'OG Kush', amount: 50 },
+    { name: 'Purple Haze Buds', description: 'Result of harvesting Purple Haze seeds.', type: 'Indica', variety: 'Purple Haze', amount: 100 },
+    { name: 'Lemon Haze Buds', description: 'Result of harvesting Lemon Haze seeds.', type: 'Sativa', variety: 'Lemon Haze', amount: 100 },
+    { name: 'Mango Kush Buds', description: 'Result of harvesting Mango Kush seeds.', type: 'Ruderalis', variety: 'Mango Kush', amount: 100 }
+]
+```
 
-https://forum.athenaframework.com/
- 
+## Default Settings
+
+```typescript
+export const ATHENA_PLANTCONTROLLER = {
+    name: 'PlantController',
+    version: 'v1.0',
+    useDiscordLogs: false,
+    discordChannel: 'someChannelId',
+};
+
+export const PLANTCONTROLLER_DATABASE = {
+    collectionName: 'plants', // Change me before booting if you need to.
+};
+
+export const PLANTCONTROLLER_SETTINGS = {
+    smallPot: 'bkr_prop_weed_01_small_01a', // LEAVE ME ALONE
+    mediumPot: 'bkr_prop_weed_med_01a', // LEAVE ME ALONE
+    largePot: 'bkr_prop_weed_lrg_01a', // LEAVE ME ALONE
+    updateInterval: 3000, // Used to set the timer's update Interval.
+    distanceToSpot: 10,
+    interactionRange: 1,
+    textLabelDistance: 3,
+};
+
+// use 'default' to skip animations.
+// Example ->
+// seedingAnimName: 'default',
+// seedingAnimDict: 'default',
+export const PLANTCONTROLLER_ANIMATIONS = {
+    seedingAnimName: 'base',
+    seedingAnimDict: 'amb@world_human_gardener_plant@male@base',
+    seedingAnimDuration: 3000,
+
+    fertilizingAnimName: 'base',
+    fertilizingAnimDict: 'amb@world_human_gardener_plant@male@base',
+    fertilizingAnimDuration: 3000,
+
+    waterAnimName: 'base',
+    waterAnimDict: 'amb@world_human_gardener_plant@male@base',
+    waterAnimDuration: 3000,
+
+    harvestAnimName: 'base',
+    harvestAnimDict: 'amb@world_human_gardener_plant@male@base',
+    harvestAnimDuration: 3000,
+};
+
+/**
+* The `PLANTCONTROLLER_SPOTS` array contains the locations of the spots where the plants
+can be placed.
+*/
+export const PLANTCONTROLLER_SPOTS: alt.Vector3[] = [
+    { x: -1625.6290283203125, y: 3165.891357421875, z: 29.933713912963867 } as alt.Vector3,
+    { x: 3705.656982421875, y: 3079.053955078125, z: 13.06076717376709 } as alt.Vector3,
+    { x: 3693.6142578125, y: 4932.6845703125, z: 18.710264205932617 } as alt.Vector3,
+    { x: 2505.236328125, y: -2110.73095703125, z: 30.00033950805664 } as alt.Vector3,
+];
+
+/**
+ * The `PLANTCONTROLLER_TRANSLATIONS` enum is used to store the text that will be displayed in the
+ * UI when the player interacts with a plant.
+ */
+export enum PLANTCONTROLLER_TRANSLATIONS {
+    // Related to general
+    notInRange = 'Not in range of a valid plant spot!',
+    // Related to Interaction Controllers.
+    seedsRequired = 'Requires Seeds.',
+    fertilizerRequired = 'Requires Fertilizer.',
+    waterRequired = `Requires Water.`,
+    seedingInteraction = 'Plant Seeds',
+    fertilizingInteraction = 'Fertilize',
+    waterInteraction = 'Water Plant',
+    harvestable = 'Harvestable',
+}
+```
+## Scripting Example 
+```typescript
+alt.on('PlantController:Server:CreatePot', (player: alt.Player, data: Item) => {
+    PlantController.addPlant(player, {
+        model: PLANTCONTROLLER_SETTINGS.smallPot,
+        shaIdentifier: PlantController.generateShaId(player),
+        data: {
+            owner: player.data.name,
+            variety: '',
+            type: '',
+            seeds: false,
+            fertilized: false,
+            state: PLANTCONTROLLER_TRANSLATIONS.seedsRequired,
+            remaining: 1337, // Don't touch. Different Times for Different Seeds? ;)
+            startTime: 1337, // Don't touch.
+            water: 0,
+            harvestable: false,
+        },
+        position: { x: player.pos.x + 1, y: player.pos.y, z: player.pos.z - 1 } as alt.Vector3,
+    });
+});
+```
+
+## Issues
+- A few left i guess ;)
+
+
+## Images
+
+![image](https://user-images.githubusercontent.com/82890183/147868854-2354f997-12f6-41a4-a6d0-993f96a208e6.png)
+
+![image](https://user-images.githubusercontent.com/82890183/147867739-5123726b-0c8a-4e42-8cbe-4bd6e34835c9.png)
+
+![image](https://user-images.githubusercontent.com/82890183/147867743-d105fedf-f559-4136-acfd-bc585d7a9c61.png)
+
+![image](https://user-images.githubusercontent.com/82890183/147868683-79228be4-8144-4fa6-bde4-5935c219e672.png)
+
