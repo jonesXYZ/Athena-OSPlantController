@@ -18,7 +18,6 @@ const potItem: Item = {
     icon: 'crate',
     quantity: 1,
     behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.CONSUMABLE | ITEM_TYPE.CAN_STACK,
-    model: 'bkr_prop_jailer_keys_01a',
     data: {
         event: 'PlantController:Server:CreatePot', // Server Event
         remaining: 720, // This Pot will need 720 minutes to grow. Usefull for "smaller, bigger"-pots.
@@ -60,7 +59,6 @@ const fertilizerItem: Item = {
     icon: 'crate',
     quantity: 1,
     behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.CAN_STACK,
-    model: 'bkr_prop_jailer_keys_01a',
     data: {
     },
     rarity: 3,
@@ -74,7 +72,6 @@ const waterItem: Item = {
     icon: 'crate',
     quantity: 1,
     behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.CAN_STACK,
-    model: 'bkr_prop_jailer_keys_01a',
     data: {
         amount: 100,
     },
@@ -97,7 +94,6 @@ buds.forEach(async (bud, i) => {
         icon: 'crate',
         quantity: 1,
         behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.CAN_STACK,
-        model: 'bkr_prop_jailer_keys_01a',
         data: {
             type: bud.type,
             variety: bud.variety,
