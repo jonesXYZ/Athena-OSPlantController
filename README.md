@@ -8,10 +8,20 @@ This plugin for the Athena Framework allows you to grow different strains with d
 The harvest of your plant is freely determinable, depending on how long your plant needs to grow.
 
 ## Features
-- Different varieties with different adjustable yields
+- Different varieties with different adjustable yields!
 - Sow, fertilize, water and harvest your plants!
+- Adjustable according to your wishes!
+- Create as many plant spots as you like!
+- Custom animations for sowing, fertilizing, watering and harvesting!
 
 ## Setup & Imports
+- Create a new folder called "AthenaPlantController" and drop stuff from this branch there.
+- Since this is an serverside plugin we just need to import the index.ts file.
+- Database and default items will be created on the first bootup of the Athena Framework.
+```typescript
+// src/core/plugins/import.ts ->
+import './AthenaPlantController/index';
+```
 
 ## Setup Items
 - Be careful that you'll need same type & variety!
@@ -110,9 +120,31 @@ export enum PLANTCONTROLLER_TRANSLATIONS {
     harvestable = 'Harvestable',
 }
 ```
+## Scripting Example 
+```typescript
+alt.on('PlantController:Server:CreatePot', (player: alt.Player, data: Item) => {
+    PlantController.addPlant(player, {
+        model: PLANTCONTROLLER_SETTINGS.smallPot,
+        shaIdentifier: PlantController.generateShaId(player),
+        data: {
+            owner: player.data.name,
+            variety: '',
+            type: '',
+            seeds: false,
+            fertilized: false,
+            state: PLANTCONTROLLER_TRANSLATIONS.seedsRequired,
+            remaining: 1337, // Don't touch. Different Times for Different Seeds? ;)
+            startTime: 1337, // Don't touch.
+            water: 0,
+            harvestable: false,
+        },
+        position: { x: player.pos.x + 1, y: player.pos.y, z: player.pos.z - 1 } as alt.Vector3,
+    });
+});
+```
 
 ## Issues
-- Seeds has to be at Index zero, can't have multiple Seeds in Inventory atm.
+- A few left i guess ;)
 
 
 ## Images
