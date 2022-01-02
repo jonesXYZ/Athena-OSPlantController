@@ -148,6 +148,12 @@ alt.on('PlantController:Server:CreatePot', (player: alt.Player, data: Item) => {
 
 
 ## Images
+
+![image](https://user-images.githubusercontent.com/82890183/147868854-2354f997-12f6-41a4-a6d0-993f96a208e6.png)
+
 ![image](https://user-images.githubusercontent.com/82890183/147867739-5123726b-0c8a-4e42-8cbe-4bd6e34835c9.png)
 
 ![image](https://user-images.githubusercontent.com/82890183/147867743-d105fedf-f559-4136-acfd-bc585d7a9c61.png)
+
+![image](https://user-images.githubusercontent.com/82890183/147868683-79228be4-8144-4fa6-bde4-5935c219e672.png)
+
