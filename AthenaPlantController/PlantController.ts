@@ -10,18 +10,13 @@ import {
 import { ServerTextLabelController } from '../../server/streamers/textlabel';
 import { ServerObjectController } from '../../server/streamers/object';
 import { DiscordController } from '../../server/systems/discord';
-import IPlants from './src/interfaces/IPlants';
 import { InteractionController } from '../../server/systems/interaction';
 import { sha256Random } from '../../server/utility/encryption';
 import { ItemFactory } from '../../server/systems/item';
 import { buds, PLANTCONTROLLER_ITEMS, seeds } from './src/server-items';
 import { playerFuncs } from '../../server/extensions/Player';
-import { Item } from '../../shared/interfaces/item';
 import { ANIMATION_FLAGS } from '../../shared/flags/animationFlags';
-import data from '../job-mule-delivery/src/data';
-
-const result = { id: '' };
-let textLabel: string;
+import IPlants from './src/interfaces/IPlants';
 
 export class PlantController implements IPlants {
     _id: string;
