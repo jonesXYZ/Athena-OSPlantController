@@ -12,18 +12,41 @@ import Database from '@stuyk/ezmongodb';
 import IPlants from './interfaces/IPlants';
 import { ITEM_TYPE } from '../../../shared/enums/itemTypes';
 import { playerFuncs } from '../../../server/extensions/Player';
+import { ItemFactory } from '../../../server/systems/item';
+import { PLANTCONTROLLER_ITEMS } from './server-items';
 
 /**
  * When the player clicks on the Plant Pot in inventory, the server will create a new pot for the
 player.
  */
 alt.on('PlantController:Server:CreatePot', async (player: alt.Player, data: Item) => {
+    const potItem = await ItemFactory.get(PLANTCONTROLLER_ITEMS.potItemName);
+    const potInInventory = playerFuncs.inventory.isInInventory(player, { name: potItem.name });
+    const potInToolbar = playerFuncs.inventory.isInToolbar(player, { name: potItem.name });
+
     const vectorInFront = getVectorInFrontOfPlayer(player, 1);
-    const emptySlot = playerFuncs.inventory.getFreeInventorySlot(player);
     const allPlants = await Database.fetchAllData<IPlants>(PLANTCONTROLLER_DATABASE.collectionName);
+
     for (let i = 0; i < allPlants.length; i++) {
-        if (player.pos.isInRange(allPlants[i].position, 2)) {
-            alt.log(player.pos.isInRange(allPlants[i].position, 2));
+        if (player.pos.isInRange(allPlants[i].position, PLANTCONTROLLER_SETTINGS.distanceBetweenPlants)) {
+            if (potInInventory) {
+                if(potItem.behavior !== ITEM_TYPE.SKIP_CONSUMABLE) {
+                    potItem.behavior = ITEM_TYPE.SKIP_CONSUMABLE;
+                    player.data.inventory[potInInventory.index].quantity += 1;
+                    playerFuncs.save.field(player, 'inventory', player.data.inventory);
+                    playerFuncs.sync.inventory(player);
+                    alt.log("Too close to plants " + JSON.stringify(potItem.behavior) + " | " + potItem.quantity);
+                    return;
+                }
+            }
+
+            if(potInToolbar) {
+                potItem.behavior = ITEM_TYPE.SKIP_CONSUMABLE;
+                player.data.toolbar[potInInventory.index].quantity += 1;
+                playerFuncs.save.field(player, 'toolbar', player.data.toolbar);
+                playerFuncs.sync.inventory(player);
+                return;
+            }
             return;
         }
     }
@@ -32,7 +55,7 @@ alt.on('PlantController:Server:CreatePot', async (player: alt.Player, data: Item
     }
 
     if (PLANTCONTROLLER_SETTINGS.useSpots) {
-        for (let i = 0; i < PLANTCONTROLLER_SPOTS.length; i++) {
+        PLANTCONTROLLER_SPOTS.forEach((spot, i) => {
             if (player.pos.isInRange(PLANTCONTROLLER_SPOTS[i], PLANTCONTROLLER_SETTINGS.distanceToSpot)) {
                 PlantController.addPlant(player, {
                     model: PLANTCONTROLLER_SETTINGS.smallPot,
@@ -44,16 +67,15 @@ alt.on('PlantController:Server:CreatePot', async (player: alt.Player, data: Item
                         seeds: false,
                         fertilized: false,
                         state: PLANTCONTROLLER_TRANSLATIONS.seedsRequired,
-                        remaining: 1337, // Don't touch. Different Times for Different Seeds? ;)
-                        startTime: 1337, // Don't touch.
+                        remaining: -1, // Don't touch. Different Times for Different Seeds? ;)
+                        startTime: -1, // Don't touch.
                         water: 0,
                         harvestable: false,
                     },
                     position: { x: vectorInFront.x, y: vectorInFront.y, z: vectorInFront.z - 1 } as alt.Vector3,
                 });
-            } else {
                 return;
             }
-        }
+        });
     }
 });

@@ -27,6 +27,7 @@ export const PLANTCONTROLLER_SETTINGS = {
     updateInterval: 3000, // Used to set the timer's update Interval.
     allowInterior: false, // Allow in Interior / Other dimensions which are not null?
     distanceToSpot: 10,
+    distanceBetweenPlants: 2,
     interactionRange: 0.8,
     textLabelDistance: 3,
 };

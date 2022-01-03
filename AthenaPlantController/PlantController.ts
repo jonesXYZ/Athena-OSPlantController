@@ -95,6 +95,7 @@ export class PlantController implements IPlants {
             data: `~g~${data.data.state}`,
             maxDistance: PLANTCONTROLLER_SETTINGS.textLabelDistance,
         });
+
         this.createSeedingInteraction(newPlant);
         return await Database.insertData(newPlant, PLANTCONTROLLER_DATABASE.collectionName, false);
     }
@@ -118,6 +119,7 @@ export class PlantController implements IPlants {
                     seeds.forEach(async (seed, i) => {
                         const itemToSeed = await ItemFactory.get(seed.name);
                         const hasSeeds = playerFuncs.inventory.isInToolbar(player, { name: itemToSeed.name });
+
                         if (hasSeeds) {
                             if (
                                 PLANTCONTROLLER_ANIMATIONS.seedingAnimName != 'default' &&
@@ -137,13 +139,16 @@ export class PlantController implements IPlants {
                                     data.data.variety = itemToSeed.data.variety;
                                     data.data.remaining = itemToSeed.data.time;
                                     data.data.startTime = itemToSeed.data.time;
+
                                     this.updatePlant(data._id, data);
                                     player.data.toolbar[hasSeeds.index].quantity -= 1;
                                     if (player.data.toolbar[hasSeeds.index].quantity <= 1) {
                                         playerFuncs.inventory.toolbarRemove(player, hasSeeds.index);
                                     }
+
                                     playerFuncs.save.field(player, 'toolbar', player.data.toolbar);
                                     playerFuncs.sync.inventory(player);
+
                                     this.createFertilizingInteraction(data);
                                     return;
                                 }, PLANTCONTROLLER_ANIMATIONS.seedingAnimDuration);
@@ -154,7 +159,9 @@ export class PlantController implements IPlants {
                                 data.data.variety = itemToSeed.data.variety;
                                 data.data.remaining = itemToSeed.data.time;
                                 data.data.startTime = itemToSeed.data.time;
+
                                 this.updatePlant(data._id, data);
+
                                 player.data.toolbar[hasSeeds.index].quantity -= 1;
                                 playerFuncs.save.field(player, 'toolbar', player.data.toolbar);
                                 playerFuncs.sync.inventory(player);
@@ -164,6 +171,7 @@ export class PlantController implements IPlants {
                                     playerFuncs.sync.inventory(player);
                                     return;
                                 }
+
                                 this.createFertilizingInteraction(data);
                                 return;
                             }
@@ -266,6 +274,7 @@ export class PlantController implements IPlants {
                                 ANIMATION_FLAGS.NORMAL,
                                 PLANTCONTROLLER_ANIMATIONS.waterAnimDuration,
                             );
+
                             alt.setTimeout(() => {
                                 player.data.inventory[hasWater.index].quantity -= 1;
                                 if (player.data.inventory[hasWater.index].quantity <= 1) {
@@ -288,12 +297,15 @@ export class PlantController implements IPlants {
                             }
                             playerFuncs.save.field(player, 'inventory', player.data.inventory);
                             playerFuncs.sync.inventory(player);
+
                             if (data.data.water >= 100) {
                                 data.data.water = 100;
                                 return;
                             }
+
                             data.data.water += itemToWater.data.amount;
                             data.data.state = PLANTCONTROLLER_TRANSLATIONS.waterRequired;
+
                             this.updatePlant(data._id, data);
                         }
                     }
@@ -302,6 +314,7 @@ export class PlantController implements IPlants {
             });
         }
     }
+    
     /**
      * `removePlant` is a function that takes in a plant id and removes the plant from the database.
      * @param {string} id - string
@@ -354,16 +367,17 @@ export class PlantController implements IPlants {
                 model: data.model,
                 uid: data.shaIdentifier,
             });
+
             if (!data.data.seeds) {
                 this.createSeedingInteraction(data);
-            } else if(!data.data.fertilized) {
+            } else if (!data.data.fertilized) {
                 this.createFertilizingInteraction(data);
-            }
-            else if (data.data.fertilized && data.data.water === 0) {
+            } else if (data.data.fertilized && data.data.water === 0) {
                 this.createWaterInteraction(data);
             }
+
             if (!data.data.harvestable) {
-                if(data.data.remaining === 1337) {
+                if (data.data.remaining === -1) {
                     ServerTextLabelController.append({
                         uid: data.shaIdentifier,
                         pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5 },
@@ -386,6 +400,7 @@ export class PlantController implements IPlants {
             }
         });
     }
+
     /**
      * Update all plants in the database.
      * @returns None
@@ -396,6 +411,7 @@ export class PlantController implements IPlants {
             if (plant.data.water > 0 && plant.data.remaining > 0) {
                 plant.data.water -= 1;
                 plant.data.remaining -= 1;
+
                 if (plant.data.remaining === plant.data.startTime / 2) {
                     ServerObjectController.remove(plant.shaIdentifier);
                     ServerObjectController.append({
@@ -405,11 +421,13 @@ export class PlantController implements IPlants {
                     });
                     plant.model = PLANTCONTROLLER_SETTINGS.mediumPot;
                 }
+
                 if (plant.data.water <= 20) {
                     this.createWaterInteraction(plant);
                 }
-                await Database.updatePartialData(plant._id, plant, PLANTCONTROLLER_DATABASE.collectionName);
                 this.refreshLabels(plant);
+
+                await Database.updatePartialData(plant._id, plant, PLANTCONTROLLER_DATABASE.collectionName);
             } else if (plant.data.remaining === 0) {
                 plant.data.harvestable = true;
 
@@ -422,12 +440,14 @@ export class PlantController implements IPlants {
 
                 if (plant.model !== PLANTCONTROLLER_SETTINGS.largePot) {
                     plant.model = PLANTCONTROLLER_SETTINGS.largePot;
+
                     ServerObjectController.remove(plant.shaIdentifier);
                     ServerObjectController.append({
                         pos: { x: plant.position.x, y: plant.position.y, z: plant.position.z },
                         model: PLANTCONTROLLER_SETTINGS.largePot,
                         uid: plant.shaIdentifier,
                     });
+
                     this.createHarvestInteraction(plant);
                 }
                 await Database.updatePartialData(plant._id, plant, PLANTCONTROLLER_DATABASE.collectionName);
@@ -463,6 +483,7 @@ export class PlantController implements IPlants {
                     alt.setTimeout(() => {
                         ServerTextLabelController.remove(data.shaIdentifier);
                         ServerObjectController.remove(data.shaIdentifier);
+
                         buds.forEach(async (bud, i) => {
                             if (data.data.variety === bud.variety) {
                                 const harvestedItem = await ItemFactory.get(bud.name);
@@ -489,6 +510,7 @@ export class PlantController implements IPlants {
             },
         });
     }
+
     /**
      * Send a message to the Discord channel specified in the config.
      * @param {string} msg - The message to send to the channel.
@@ -511,6 +533,7 @@ export class PlantController implements IPlants {
     public static generateShaId(player: alt.Player) {
         return sha256Random(player.data.name).toString();
     }
+
     /**
      * Remove the interaction from the InteractionController.
      * @param {IPlants} data - IPlants

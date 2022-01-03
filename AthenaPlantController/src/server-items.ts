@@ -20,7 +20,6 @@ const potItem: Item = {
     behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.CONSUMABLE | ITEM_TYPE.CAN_STACK,
     data: {
         event: 'PlantController:Server:CreatePot', // Server Event
-        remaining: 720, // This Pot will need 720 minutes to grow. Usefull for "smaller, bigger"-pots.
     },
     rarity: 3,
     dbName: PLANTCONTROLLER_ITEMS.potItemName
