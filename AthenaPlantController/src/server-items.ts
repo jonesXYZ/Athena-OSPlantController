@@ -17,7 +17,7 @@ const potItem: Item = {
     description: `PlantController - Some Description to show for debugging purposes.`,
     icon: 'crate',
     quantity: 100,
-    behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.CONSUMABLE | ITEM_TYPE.CAN_STACK,
+    behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.CONSUMABLE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.CAN_STACK,
     data: {
         event: 'PlantController:Server:CreatePot', // Server Event
     },

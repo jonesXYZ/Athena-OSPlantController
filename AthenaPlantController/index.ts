@@ -23,10 +23,10 @@ export const PLANTCONTROLLER_SETTINGS = {
     smallPot: 'bkr_prop_weed_01_small_01a', // LEAVE ME ALONE
     mediumPot: 'bkr_prop_weed_med_01a', // LEAVE ME ALONE
     largePot: 'bkr_prop_weed_lrg_01a', // LEAVE ME ALONE
-    useSpots: true, // Use configured Spots?
+    useSpots: true, // Use configured Spots? Highly recommend for now.
     updateInterval: 3000, // Used to set the timer's update Interval.
     allowInterior: false, // Allow in Interior / Other dimensions which are not null?
-    distanceToSpot: 10,
+    distanceToSpot: 25,
     distanceBetweenPlants: 2,
     interactionRange: 0.8,
     textLabelDistance: 3,

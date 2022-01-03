@@ -10,7 +10,6 @@ import { getVectorInFrontOfPlayer } from '../../../server/utility/vector';
 import { PlantController } from '../PlantController';
 import Database from '@stuyk/ezmongodb';
 import IPlants from './interfaces/IPlants';
-import { ITEM_TYPE } from '../../../shared/enums/itemTypes';
 import { playerFuncs } from '../../../server/extensions/Player';
 import { ItemFactory } from '../../../server/systems/item';
 import { PLANTCONTROLLER_ITEMS } from './server-items';
@@ -20,62 +19,80 @@ import { PLANTCONTROLLER_ITEMS } from './server-items';
 player.
  */
 alt.on('PlantController:Server:CreatePot', async (player: alt.Player, data: Item) => {
+    /**
+     * Get the player's inventory and toolbar, and check if the plant controller item is in either.
+     */
     const potItem = await ItemFactory.get(PLANTCONTROLLER_ITEMS.potItemName);
-    const potInInventory = playerFuncs.inventory.isInInventory(player, { name: potItem.name });
-    const potInToolbar = playerFuncs.inventory.isInToolbar(player, { name: potItem.name });
-
+    const potInInventory = playerFuncs.inventory.isInInventory(player, potItem);
+    const potInToolbar = playerFuncs.inventory.isInToolbar(player, potItem);
     const vectorInFront = getVectorInFrontOfPlayer(player, 1);
     const allPlants = await Database.fetchAllData<IPlants>(PLANTCONTROLLER_DATABASE.collectionName);
 
-    for (let i = 0; i < allPlants.length; i++) {
-        if (player.pos.isInRange(allPlants[i].position, PLANTCONTROLLER_SETTINGS.distanceBetweenPlants)) {
-            if (potInInventory) {
-                if(potItem.behavior !== ITEM_TYPE.SKIP_CONSUMABLE) {
-                    potItem.behavior = ITEM_TYPE.SKIP_CONSUMABLE;
-                    player.data.inventory[potInInventory.index].quantity += 1;
-                    playerFuncs.save.field(player, 'inventory', player.data.inventory);
-                    playerFuncs.sync.inventory(player);
-                    alt.log("Too close to plants " + JSON.stringify(potItem.behavior) + " | " + potItem.quantity);
-                    return;
-                }
-            }
-
-            if(potInToolbar) {
-                potItem.behavior = ITEM_TYPE.SKIP_CONSUMABLE;
-                player.data.toolbar[potInInventory.index].quantity += 1;
-                playerFuncs.save.field(player, 'toolbar', player.data.toolbar);
-                playerFuncs.sync.inventory(player);
-                return;
-            }
-            return;
-        }
-    }
+    /**
+    * If the player is in an interior, and we don't want to allow interiors, then don't allow the
+    player to plant a plant.
+    */
     if (!PLANTCONTROLLER_SETTINGS.allowInterior) {
         if (player.data.interior != '0' && player.dimension != 0) return;
     }
 
+    /**
+     * If the player is within a certain distance of a plant, don't spawn a new plant.
+     */
+    for (let i = 0; i < allPlants.length; i++) {
+        if (player.pos.isInRange(allPlants[i].position, PLANTCONTROLLER_SETTINGS.distanceBetweenPlants)) {
+            return;
+        }
+    }
+
+    /**
+     * If the player is within a certain distance of a spot, and they have a pot in their inventory,
+    they will place the pot on the spot.
+     */
     if (PLANTCONTROLLER_SETTINGS.useSpots) {
-        PLANTCONTROLLER_SPOTS.forEach((spot, i) => {
-            if (player.pos.isInRange(PLANTCONTROLLER_SPOTS[i], PLANTCONTROLLER_SETTINGS.distanceToSpot)) {
-                PlantController.addPlant(player, {
-                    model: PLANTCONTROLLER_SETTINGS.smallPot,
-                    shaIdentifier: PlantController.generateShaId(player),
-                    data: {
-                        owner: player.data.name,
-                        variety: '',
-                        type: '',
-                        seeds: false,
-                        fertilized: false,
-                        state: PLANTCONTROLLER_TRANSLATIONS.seedsRequired,
-                        remaining: -1, // Don't touch. Different Times for Different Seeds? ;)
-                        startTime: -1, // Don't touch.
-                        water: 0,
-                        harvestable: false,
-                    },
-                    position: { x: vectorInFront.x, y: vectorInFront.y, z: vectorInFront.z - 1 } as alt.Vector3,
-                });
-                return;
+        for (let x = 0; x < PLANTCONTROLLER_SPOTS.length; x++) {
+            if (player.pos.isInRange(PLANTCONTROLLER_SPOTS[x], PLANTCONTROLLER_SETTINGS.distanceToSpot)) {
+                if (!player.pos.isInRange(PLANTCONTROLLER_SPOTS[x], PLANTCONTROLLER_SETTINGS.distanceToSpot)) {
+                    continue;
+                } else {
+                    PlantController.addPlant(player, {
+                        model: PLANTCONTROLLER_SETTINGS.smallPot,
+                        shaIdentifier: PlantController.generateShaId(player),
+                        data: {
+                            owner: player.data.name,
+                            variety: '',
+                            type: '',
+                            seeds: false,
+                            fertilized: false,
+                            state: PLANTCONTROLLER_TRANSLATIONS.seedsRequired,
+                            remaining: -1, // Don't touch. Different Times for Different Seeds? ;)
+                            startTime: -1, // Don't touch.
+                            water: 0,
+                            harvestable: false,
+                        },
+                        position: { x: vectorInFront.x, y: vectorInFront.y, z: vectorInFront.z - 1 } as alt.Vector3,
+                    });
+
+                    if (potInInventory) {
+                        player.data.inventory[potInInventory.index].quantity -= 1;
+                        if (player.data.inventory[potInInventory.index].quantity <= 1) {
+                            playerFuncs.inventory.findAndRemove(player, potItem.name);
+                        }
+                        playerFuncs.save.field(player, 'inventory', player.data.inventory);
+                        playerFuncs.sync.inventory(player);
+                    }
+
+                    if (potInToolbar) {
+                        player.data.toolbar[potInToolbar.index].quantity -= 1;
+                        if (player.data.toolbar[potInToolbar.index].quantity <= 1) {
+                            playerFuncs.inventory.toolbarRemove(player, potInToolbar.index);
+                        }
+                        playerFuncs.save.field(player, 'tooolbar', player.data.toolbar);
+                        playerFuncs.sync.inventory(player);
+                    }
+                    break;
+                }
             }
-        });
+        }
     }
 });
