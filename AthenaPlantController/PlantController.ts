@@ -355,19 +355,27 @@ export class PlantController implements IPlants {
                 uid: data.shaIdentifier,
             });
             if (!data.data.seeds) {
-                ServerTextLabelController.append({
-                    uid: data.shaIdentifier,
-                    pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5 },
-                    data: `~g~${PLANTCONTROLLER_TRANSLATIONS.seedsRequired}`,
-                });
                 this.createSeedingInteraction(data);
+            } else if(!data.data.fertilized) {
+                this.createFertilizingInteraction(data);
+            }
+            else if (data.data.fertilized && data.data.water === 0) {
+                this.createWaterInteraction(data);
             }
             if (!data.data.harvestable) {
-                ServerTextLabelController.append({
-                    uid: data.shaIdentifier,
-                    pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5 },
-                    data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~n~~g~${data.data.state}~n~~n~~b~${data.data.water}% ~w~| ~g~${data.data.remaining}m`,
-                });
+                if(data.data.remaining === 1337) {
+                    ServerTextLabelController.append({
+                        uid: data.shaIdentifier,
+                        pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5 },
+                        data: `~g~${PLANTCONTROLLER_TRANSLATIONS.seedsRequired}`,
+                    });
+                } else {
+                    ServerTextLabelController.append({
+                        uid: data.shaIdentifier,
+                        pos: { x: data.position.x, y: data.position.y, z: data.position.z + 0.5 },
+                        data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~n~~g~${data.data.state}~n~~n~~b~${data.data.water}% ~w~| ~g~${data.data.remaining} minutes`,
+                    });
+                }
             } else if (data.data.harvestable) {
                 ServerTextLabelController.append({
                     uid: data.shaIdentifier,
@@ -375,12 +383,6 @@ export class PlantController implements IPlants {
                     data: `~g~${data.data.variety} ~w~| ~g~${data.data.type}~n~~g~${PLANTCONTROLLER_TRANSLATIONS.harvestable}`,
                 });
                 this.createHarvestInteraction(data);
-            }
-            if (data.data.seeds && !data.data.fertilized) {
-                this.createFertilizingInteraction(data);
-            }
-            if (data.data.fertilized && data.data.water === 0) {
-                this.createWaterInteraction(data);
             }
         });
     }
@@ -444,6 +446,7 @@ export class PlantController implements IPlants {
             identifier: data.shaIdentifier,
             description: 'Harvest',
             position: data.position as alt.Vector3,
+            range: PLANTCONTROLLER_SETTINGS.interactionRange,
             callback: async (player: alt.Player) => {
                 const emptySlot = playerFuncs.inventory.getFreeInventorySlot(player);
                 if (

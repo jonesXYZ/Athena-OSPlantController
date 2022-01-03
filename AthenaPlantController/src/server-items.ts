@@ -16,7 +16,7 @@ const potItem: Item = {
     uuid: sha256(PLANTCONTROLLER_ITEMS.potItemName),
     description: `PlantController - Some Description to show for debugging purposes.`,
     icon: 'crate',
-    quantity: 1,
+    quantity: 100,
     behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.CONSUMABLE | ITEM_TYPE.CAN_STACK,
     data: {
         event: 'PlantController:Server:CreatePot', // Server Event
@@ -38,7 +38,7 @@ seeds.forEach(async (seed, i) => {
         uuid: sha256(seed.name),
         description: seed.description,
         icon: 'crate',
-        quantity: 1,
+        quantity: 100,
         behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.CAN_STACK | ITEM_TYPE.IS_TOOLBAR,
         data: {
             type: seed.type, // Type of Outcome (=> Lemon Haze, Sativa)
@@ -56,7 +56,7 @@ const fertilizerItem: Item = {
     uuid: sha256(PLANTCONTROLLER_ITEMS.fertilizerItemName),
     description: 'Powerful Database Description',
     icon: 'crate',
-    quantity: 1,
+    quantity: 100,
     behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.CAN_STACK,
     data: {
     },
@@ -69,7 +69,7 @@ const waterItem: Item = {
     uuid: sha256(PLANTCONTROLLER_ITEMS.waterItemName),
     description: 'Powerful Database Description',
     icon: 'crate',
-    quantity: 1,
+    quantity: 100,
     behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.CAN_STACK,
     data: {
         amount: 100,
