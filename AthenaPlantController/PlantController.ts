@@ -18,6 +18,8 @@ import { playerFuncs } from '../../server/extensions/Player';
 import { ANIMATION_FLAGS } from '../../shared/flags/animationFlags';
 import IPlants from './src/interfaces/IPlants';
 import { Item } from '../../shared/interfaces/item';
+import { Collections } from '../../server/interface/DatabaseCollections';
+import { ITEM_TYPE } from '../../shared/enums/itemTypes';
 
 export class PlantController implements IPlants {
     _id: string;
