@@ -1,3 +1,4 @@
+import { ItemFactory } from "../../../../server/systems/item";
 import { sha256 } from "../../../../server/utility/encryption";
 import { ITEM_TYPE } from "../../../../shared/enums/itemTypes";
 import { Item } from "../../../../shared/interfaces/item";

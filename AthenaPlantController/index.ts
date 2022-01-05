@@ -5,7 +5,7 @@ import { ServerBlipController } from '../../server/systems/blip';
 import { SYSTEM_EVENTS } from '../../shared/enums/system';
 
 import './src/server-events';
-import './src/server-items';
+import './src/items/server-items';
 import { PlantController } from './PlantController';
 
 export const ATHENA_PLANTCONTROLLER = {

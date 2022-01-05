@@ -13,13 +13,12 @@ import { DiscordController } from '../../server/systems/discord';
 import { InteractionController } from '../../server/systems/interaction';
 import { sha256Random } from '../../server/utility/encryption';
 import { ItemFactory } from '../../server/systems/item';
-import { buds, PLANTCONTROLLER_ITEMS, seeds } from './src/server-items';
 import { playerFuncs } from '../../server/extensions/Player';
 import { ANIMATION_FLAGS } from '../../shared/flags/animationFlags';
 import IPlants from './src/interfaces/IPlants';
-import { Item } from '../../shared/interfaces/item';
-import { Collections } from '../../server/interface/DatabaseCollections';
-import { ITEM_TYPE } from '../../shared/enums/itemTypes';
+import { seeds } from './src/items/seeds';
+import { PLANTCONTROLLER_ITEMS } from './src/items/server-items';
+import { buds } from './src/items/buds';
 
 export class PlantController implements IPlants {
     _id: string;

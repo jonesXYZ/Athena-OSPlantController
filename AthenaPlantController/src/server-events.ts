@@ -12,7 +12,7 @@ import Database from '@stuyk/ezmongodb';
 import IPlants from './interfaces/IPlants';
 import { playerFuncs } from '../../../server/extensions/Player';
 import { ItemFactory } from '../../../server/systems/item';
-import { PLANTCONTROLLER_ITEMS } from './server-items';
+import { PLANTCONTROLLER_ITEMS } from './items/server-items';
 
 /**
  * When the player clicks on the Plant Pot in inventory, the server will create a new pot for the
