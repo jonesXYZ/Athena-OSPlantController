@@ -80,15 +80,15 @@ alt.on('PlantController:Server:CreatePot', async (player: alt.Player, data: Item
                         }
                         playerFuncs.save.field(player, 'inventory', player.data.inventory);
                         playerFuncs.sync.inventory(player);
-                    }
-
-                    if (potInToolbar) {
+                        break;
+                    } else if (potInToolbar) {
                         player.data.toolbar[potInToolbar.index].quantity -= 1;
                         if (player.data.toolbar[potInToolbar.index].quantity <= 1) {
                             playerFuncs.inventory.toolbarRemove(player, potInToolbar.index);
                         }
                         playerFuncs.save.field(player, 'tooolbar', player.data.toolbar);
                         playerFuncs.sync.inventory(player);
+                       break;
                     }
                     break;
                 }

@@ -115,11 +115,10 @@ export class PlantController implements IPlants {
                 position: { x: data.position.x, y: data.position.y, z: data.position.z },
                 disableMarker: true,
                 range: PLANTCONTROLLER_SETTINGS.interactionRange,
-                callback: (player: alt.Player) => {
-                    seeds.forEach(async (seed, i) => {
-                        const itemToSeed = await ItemFactory.get(seed.name);
-                        const hasSeeds = playerFuncs.inventory.isInToolbar(player, { name: itemToSeed.name });
-
+                callback: async (player: alt.Player) => {
+                    for(let i = 0; i < seeds.length; i++) {
+                        const itemToSeed = await ItemFactory.get(seeds[i].name);
+                        const hasSeeds = playerFuncs.inventory.isInInventory(player, { name: itemToSeed.name });
                         if (hasSeeds) {
                             if (
                                 PLANTCONTROLLER_ANIMATIONS.seedingAnimName != 'default' &&
@@ -141,17 +140,17 @@ export class PlantController implements IPlants {
                                     data.data.startTime = itemToSeed.data.time;
 
                                     this.updatePlant(data._id, data);
-                                    player.data.toolbar[hasSeeds.index].quantity -= 1;
-                                    if (player.data.toolbar[hasSeeds.index].quantity <= 1) {
-                                        playerFuncs.inventory.toolbarRemove(player, hasSeeds.index);
+                                    player.data.inventory[hasSeeds.index].quantity -= 1;
+                                    if (player.data.inventory[hasSeeds.index].quantity <= 1) {
+                                        playerFuncs.inventory.findAndRemove(player, itemToSeed.name);
                                     }
 
-                                    playerFuncs.save.field(player, 'toolbar', player.data.toolbar);
+                                    playerFuncs.save.field(player, 'inventory', player.data.inventory);
                                     playerFuncs.sync.inventory(player);
 
                                     this.createFertilizingInteraction(data);
-                                    return;
                                 }, PLANTCONTROLLER_ANIMATIONS.seedingAnimDuration);
+                                break;
                             } else {
                                 data.data.seeds = true;
                                 data.data.state = PLANTCONTROLLER_TRANSLATIONS.fertilizerRequired;
@@ -162,21 +161,19 @@ export class PlantController implements IPlants {
 
                                 this.updatePlant(data._id, data);
 
-                                player.data.toolbar[hasSeeds.index].quantity -= 1;
-                                playerFuncs.save.field(player, 'toolbar', player.data.toolbar);
+                                player.data.inventory[hasSeeds.index].quantity -= 1;
+                                playerFuncs.save.field(player, 'inventory', player.data.inventory);
                                 playerFuncs.sync.inventory(player);
-                                if (player.data.toolbar[hasSeeds.index].quantity == 1) {
-                                    playerFuncs.inventory.toolbarRemove(player, hasSeeds.index);
-                                    playerFuncs.save.field(player, 'toolbar', player.data.toolbar);
+                                if (player.data.inventory[hasSeeds.index].quantity == 1) {
+                                    playerFuncs.inventory.findAndRemove(player, itemToSeed.name);
+                                    playerFuncs.save.field(player, 'inventory', player.data.inventory);
                                     playerFuncs.sync.inventory(player);
-                                    return;
                                 }
-
                                 this.createFertilizingInteraction(data);
-                                return;
+                                break;
                             }
                         }
-                    });
+                    }
                 },
             });
         }
@@ -495,6 +492,8 @@ export class PlantController implements IPlants {
                         });
                     }, PLANTCONTROLLER_ANIMATIONS.harvestAnimDuration);
                 } else {
+                    ServerTextLabelController.remove(data.shaIdentifier);
+                    ServerObjectController.remove(data.shaIdentifier);
                     buds.forEach(async (bud, i) => {
                         if (data.data.variety === bud.variety) {
                             const harvestedItem = await ItemFactory.get(bud.name);
