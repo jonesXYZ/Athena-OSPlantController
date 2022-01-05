@@ -23,7 +23,6 @@ alt.on('PlantController:Server:CreatePot', async (player: alt.Player, data: Item
      * Get the player's inventory and toolbar, and check if the plant controller item is in either.
      */
     const potItem = await ItemFactory.get(PLANTCONTROLLER_ITEMS.potItemName);
-    const potInInventory = playerFuncs.inventory.isInInventory(player, potItem);
     const potInToolbar = playerFuncs.inventory.isInToolbar(player, potItem);
     const vectorInFront = getVectorInFrontOfPlayer(player, 1);
     const allPlants = await Database.fetchAllData<IPlants>(PLANTCONTROLLER_DATABASE.collectionName);
@@ -55,42 +54,32 @@ alt.on('PlantController:Server:CreatePot', async (player: alt.Player, data: Item
                 if (!player.pos.isInRange(PLANTCONTROLLER_SPOTS[x], PLANTCONTROLLER_SETTINGS.distanceToSpot)) {
                     continue;
                 } else {
-                    PlantController.addPlant(player, {
-                        model: PLANTCONTROLLER_SETTINGS.smallPot,
-                        shaIdentifier: PlantController.generateShaId(player),
-                        data: {
-                            owner: player.data.name,
-                            variety: '',
-                            type: '',
-                            seeds: false,
-                            fertilized: false,
-                            state: PLANTCONTROLLER_TRANSLATIONS.seedsRequired,
-                            remaining: -1, // Don't touch. Different Times for Different Seeds? ;)
-                            startTime: -1, // Don't touch.
-                            water: 0,
-                            harvestable: false,
-                        },
-                        position: { x: vectorInFront.x, y: vectorInFront.y, z: vectorInFront.z - 1 } as alt.Vector3,
-                    });
-
-                    if (potInInventory) {
-                        player.data.inventory[potInInventory.index].quantity -= 1;
-                        if (player.data.inventory[potInInventory.index].quantity <= 1) {
-                            playerFuncs.inventory.findAndRemove(player, potItem.name);
-                        }
-                        playerFuncs.save.field(player, 'inventory', player.data.inventory);
-                        playerFuncs.sync.inventory(player);
-                        break;
-                    } else if (potInToolbar) {
+                    if (potInToolbar) {
+                        PlantController.addPlant(player, {
+                            model: PLANTCONTROLLER_SETTINGS.smallPot,
+                            shaIdentifier: PlantController.generateShaId(player),
+                            data: {
+                                owner: player.data.name,
+                                variety: '',
+                                type: '',
+                                seeds: false,
+                                fertilized: false,
+                                state: PLANTCONTROLLER_TRANSLATIONS.seedsRequired,
+                                remaining: -1, // Don't touch. Different Times for Different Seeds? ;)
+                                startTime: -1, // Don't touch.
+                                water: 0,
+                                harvestable: false,
+                            },
+                            position: { x: vectorInFront.x, y: vectorInFront.y, z: vectorInFront.z - 1 } as alt.Vector3,
+                        });
                         player.data.toolbar[potInToolbar.index].quantity -= 1;
                         if (player.data.toolbar[potInToolbar.index].quantity <= 1) {
                             playerFuncs.inventory.toolbarRemove(player, potInToolbar.index);
                         }
                         playerFuncs.save.field(player, 'tooolbar', player.data.toolbar);
                         playerFuncs.sync.inventory(player);
-                       break;
-                    }
-                    break;
+                       // continue;
+                    } else break;
                 }
             }
         }

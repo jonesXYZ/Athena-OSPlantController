@@ -17,6 +17,7 @@ import { buds, PLANTCONTROLLER_ITEMS, seeds } from './src/server-items';
 import { playerFuncs } from '../../server/extensions/Player';
 import { ANIMATION_FLAGS } from '../../shared/flags/animationFlags';
 import IPlants from './src/interfaces/IPlants';
+import { Item } from '../../shared/interfaces/item';
 
 export class PlantController implements IPlants {
     _id: string;
@@ -234,7 +235,7 @@ export class PlantController implements IPlants {
                             playerFuncs.save.field(player, 'inventory', player.data.inventory);
                             playerFuncs.sync.inventory(player);
                         }
-                    }
+                    } else return;
                 },
             });
         }
