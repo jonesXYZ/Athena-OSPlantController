@@ -5,11 +5,11 @@ import { Item } from '../../../shared/interfaces/item';
 
 export const PLANTCONTROLLER_ITEMS = {
     fertilizerItemName: 'Fertilizer', // Change me before booting if you need to.
-	seedsItemName: 'Seeds', // Change me before booting if you need to.
-	waterItemName: 'Plantwater', // Change me before booting if you need to.
-	potItemName: 'Plant Pot', // Change me before booting if you need to.
-	budItemName: 'Buds', // Change me before booting if you need to.
-}
+    seedsItemName: 'Seeds', // Change me before booting if you need to.
+    waterItemName: 'Plantwater', // Change me before booting if you need to.
+    potItemName: 'Plant Pot', // Change me before booting if you need to.
+    budItemName: 'Buds', // Change me before booting if you need to.
+};
 
 const potItem: Item = {
     name: PLANTCONTROLLER_ITEMS.potItemName,
@@ -17,20 +17,53 @@ const potItem: Item = {
     description: `PlantController - Some Description to show for debugging purposes.`,
     icon: 'crate',
     quantity: 100,
-    behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.CONSUMABLE | ITEM_TYPE.CAN_STACK,
+    behavior:
+        ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.CONSUMABLE | ITEM_TYPE.CAN_STACK,
     data: {
         event: 'PlantController:Server:CreatePot', // Server Event
     },
     rarity: 3,
-    dbName: PLANTCONTROLLER_ITEMS.potItemName
+    dbName: PLANTCONTROLLER_ITEMS.potItemName,
+    version: 1,
 };
+
 export const seeds = [
-    { name: 'Northern Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'Northern Haze', time: 10 },
-    { name: 'OG Kush Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'OG Kush', time: 10 },
-    { name: 'Purple Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'Purple Haze', time: 10 },
-    { name: 'Lemon Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Sativa', variety: 'Lemon Haze', time: 10, },
-    { name: 'Mango Kush Seeds', description: 'Casual seeds for the casual grower.', type: 'Ruderalis', variety: 'Mango Kush', time: 10 }
-]
+    {
+        name: 'Northern Haze Seeds',
+        description: 'Casual seeds for the casual grower.',
+        type: 'Indica',
+        variety: 'Northern Haze',
+        time: 10,
+    },
+    {
+        name: 'OG Kush Seeds',
+        description: 'Casual seeds for the casual grower.',
+        type: 'Indica',
+        variety: 'OG Kush',
+        time: 10,
+    },
+    {
+        name: 'Purple Haze Seeds',
+        description: 'Casual seeds for the casual grower.',
+        type: 'Indica',
+        variety: 'Purple Haze',
+        time: 10,
+    },
+    {
+        name: 'Lemon Haze Seeds',
+        description: 'Casual seeds for the casual grower.',
+        type: 'Sativa',
+        variety: 'Lemon Haze',
+        time: 10,
+    },
+    {
+        name: 'Mango Kush Seeds',
+        description: 'Casual seeds for the casual grower.',
+        type: 'Ruderalis',
+        variety: 'Mango Kush',
+        time: 10,
+    },
+];
 seeds.forEach(async (seed, i) => {
     const seedsItem: Item = {
         name: seed.name,
@@ -38,29 +71,36 @@ seeds.forEach(async (seed, i) => {
         description: seed.description,
         icon: 'crate',
         quantity: 100,
-        behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.CAN_STACK | ITEM_TYPE.IS_TOOLBAR,
+        behavior:
+            ITEM_TYPE.CAN_DROP |
+            ITEM_TYPE.CAN_TRADE |
+            ITEM_TYPE.SKIP_CONSUMABLE |
+            ITEM_TYPE.CAN_STACK |
+            ITEM_TYPE.IS_TOOLBAR,
         data: {
             type: seed.type, // Type of Outcome (=> Lemon Haze, Sativa)
             variety: seed.variety, // This Pot will just return "Lemon-Haze Buds",
-            time: seed.time
+            time: seed.time,
         },
         rarity: 3,
-        dbName: seed.name
+        dbName: seed.name,
+        version: 1,
     };
     await ItemFactory.add(seedsItem);
+    await ItemFactory.update(seedsItem.name, seedsItem);
 });
 
-const fertilizerItem: Item = {
+export const fertilizerItem: Item = {
     name: PLANTCONTROLLER_ITEMS.fertilizerItemName,
     uuid: sha256(PLANTCONTROLLER_ITEMS.fertilizerItemName),
-    description: 'Powerful Database Description',
+    description: 'Powerful Database Description - Powerd by Athena ItemUpdater',
     icon: 'crate',
-    quantity: 100,
+    quantity: 1,
     behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.CAN_STACK,
-    data: {
-    },
+    data: {},
     rarity: 3,
-    dbName: PLANTCONTROLLER_ITEMS.fertilizerItemName
+    dbName: PLANTCONTROLLER_ITEMS.fertilizerItemName,
+    version: 1,
 };
 
 const waterItem: Item = {
@@ -74,16 +114,47 @@ const waterItem: Item = {
         amount: 100,
     },
     rarity: 3,
-    dbName: PLANTCONTROLLER_ITEMS.waterItemName
+    dbName: PLANTCONTROLLER_ITEMS.waterItemName,
+    version: 1,
 };
 
 export const buds = [
-    { name: 'Northern Haze Buds', description: 'Result of harvesting Northern Haze seeds.', type: 'Indica', variety: 'Northern Haze', amount: 100 },
-    { name: 'OG Kush Buds', description: 'Result of harvesting OG Kush seeds.', type: 'Indica', variety: 'OG Kush', amount: 50 },
-    { name: 'Purple Haze Buds', description: 'Result of harvesting Purple Haze seeds.', type: 'Indica', variety: 'Purple Haze', amount: 100 },
-    { name: 'Lemon Haze Buds', description: 'Result of harvesting Lemon Haze seeds.', type: 'Sativa', variety: 'Lemon Haze', amount: 100 },
-    { name: 'Mango Kush Buds', description: 'Result of harvesting Mango Kush seeds.', type: 'Ruderalis', variety: 'Mango Kush', amount: 100 }
-]
+    {
+        name: 'Northern Haze Buds',
+        description: 'Result of harvesting Northern Haze seeds.',
+        type: 'Indica',
+        variety: 'Northern Haze',
+        amount: 100,
+    },
+    {
+        name: 'OG Kush Buds',
+        description: 'Result of harvesting OG Kush seeds.',
+        type: 'Indica',
+        variety: 'OG Kush',
+        amount: 50,
+    },
+    {
+        name: 'Purple Haze Buds',
+        description: 'Result of harvesting Purple Haze seeds.',
+        type: 'Indica',
+        variety: 'Purple Haze',
+        amount: 100,
+    },
+    {
+        name: 'Lemon Haze Buds',
+        description: 'Result of harvesting Lemon Haze seeds.',
+        type: 'Sativa',
+        variety: 'Lemon Haze',
+        amount: 100,
+    },
+    {
+        name: 'Mango Kush Buds',
+        description: 'Result of harvesting Mango Kush seeds.',
+        type: 'Ruderalis',
+        variety: 'Mango Kush',
+        amount: 100,
+    },
+];
 buds.forEach(async (bud, i) => {
     const budsItem: Item = {
         name: bud.name,
@@ -98,10 +169,16 @@ buds.forEach(async (bud, i) => {
             amount: bud.amount,
         },
         rarity: 6,
-        dbName: bud.name
+        dbName: bud.name,
+        version: 1,
     };
     await ItemFactory.add(budsItem);
+    await ItemFactory.update(budsItem.name, budsItem);
 });
 await ItemFactory.add(potItem);
 await ItemFactory.add(fertilizerItem);
 await ItemFactory.add(waterItem);
+
+await ItemFactory.update(potItem.name, potItem);
+await ItemFactory.update(fertilizerItem.name, fertilizerItem);
+await ItemFactory.update(waterItem.name, waterItem);

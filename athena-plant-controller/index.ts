@@ -88,9 +88,8 @@ PluginSystem.registerPlugin(ATHENA_PLANTCONTROLLER.name, async () => {
 });
 
 alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, () => {
-    if(PLANTCONTROLLER_SETTINGS.useSpots) {
-        for(let i = 0; i < PLANTCONTROLLER_SPOTS.length; i++)
-        {
+    if (PLANTCONTROLLER_SETTINGS.useSpots) {
+        for (let i = 0; i < PLANTCONTROLLER_SPOTS.length; i++) {
             ServerBlipController.append({
                 shortRange: true,
                 sprite: 469,

@@ -309,7 +309,7 @@ export class PlantController implements IPlants {
             });
         }
     }
-    
+
     /**
      * `removePlant` is a function that takes in a plant id and removes the plant from the database.
      * @param {string} id - string

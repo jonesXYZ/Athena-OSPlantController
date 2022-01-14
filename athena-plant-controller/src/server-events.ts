@@ -30,17 +30,17 @@ alt.on('PlantController:Server:CreatePot', async (player: alt.Player, data: Item
     for (let i = 0; i < allPlants.length; i++) {
         if (player.pos.isInRange(allPlants[i].position, PLANTCONTROLLER_SETTINGS.distanceBetweenPlants)) {
             if (potInInventory) {
-                if(potItem.behavior !== ITEM_TYPE.SKIP_CONSUMABLE) {
+                if (potItem.behavior !== ITEM_TYPE.SKIP_CONSUMABLE) {
                     potItem.behavior = ITEM_TYPE.SKIP_CONSUMABLE;
                     player.data.inventory[potInInventory.index].quantity += 1;
                     playerFuncs.save.field(player, 'inventory', player.data.inventory);
                     playerFuncs.sync.inventory(player);
-                    alt.log("Too close to plants " + JSON.stringify(potItem.behavior) + " | " + potItem.quantity);
+                    alt.log('Too close to plants ' + JSON.stringify(potItem.behavior) + ' | ' + potItem.quantity);
                     return;
                 }
             }
 
-            if(potInToolbar) {
+            if (potInToolbar) {
                 potItem.behavior = ITEM_TYPE.SKIP_CONSUMABLE;
                 player.data.toolbar[potInInventory.index].quantity += 1;
                 playerFuncs.save.field(player, 'toolbar', player.data.toolbar);
