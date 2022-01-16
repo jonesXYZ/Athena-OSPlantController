@@ -26,25 +26,43 @@ import './AthenaPlantController/index';
 
 ## Setup Items
 - Be careful that you'll need same type & variety!
-- Seeds need to be in Toolbar Slot 0 atm!
+- Seeds need to be in Toolbar
 
 ```typescript
-// Seeds (Build a new Plant)
-export const seeds = [
-    { name: 'Northern Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'Northern Haze', time: 10 },
-    { name: 'OG Kush Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'OG Kush', time: 10 },
-    { name: 'Purple Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Indica', variety: 'Purple Haze', time: 10 },
-    { name: 'Lemon Haze Seeds', description: 'Casual seeds for the casual grower.', type: 'Sativa', variety: 'Lemon Haze', time: 10, },
-    { name: 'Mango Kush Seeds', description: 'Casual seeds for the casual grower.', type: 'Ruderalis', variety: 'Mango Kush', time: 10 }
+export const seeds: Array<Item> = [
+    {
+        name: 'Lemon Haze Seeds',
+        description: `PlantController - Some Description to show for debugging purposes.`,
+        icon: 'crate',
+        quantity: 1,
+        behavior:
+            ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.CAN_STACK | ITEM_TYPE.IS_TOOLBAR,
+        data: {
+            type: 'Sativa',
+            variety: 'Lemon Haze'
+        },
+        rarity: 0,
+        dbName: `PlantController-Lemon-Haze-Seeds`,
+        version: 1,
+    }
 ]
 
-// Buds (Harvesting a Plant)
-export const buds = [
-    { name: 'Northern Haze Buds', description: 'Result of harvesting Northern Haze seeds.', type: 'Indica', variety: 'Northern Haze', amount: 100 },
-    { name: 'OG Kush Buds', description: 'Result of harvesting OG Kush seeds.', type: 'Indica', variety: 'OG Kush', amount: 50 },
-    { name: 'Purple Haze Buds', description: 'Result of harvesting Purple Haze seeds.', type: 'Indica', variety: 'Purple Haze', amount: 100 },
-    { name: 'Lemon Haze Buds', description: 'Result of harvesting Lemon Haze seeds.', type: 'Sativa', variety: 'Lemon Haze', amount: 100 },
-    { name: 'Mango Kush Buds', description: 'Result of harvesting Mango Kush seeds.', type: 'Ruderalis', variety: 'Mango Kush', amount: 100 }
+export const buds: Array<Item> = [
+    {
+        name: 'Lemon Haze Buds',
+        description: `PlantController - Some Description to show for debugging purposes.`,
+        icon: 'crate',
+        quantity: 1,
+        behavior:
+            ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.CAN_STACK,
+        data: {
+            type: 'Sativa',
+            variety: 'Lemon Haze',
+        },
+        rarity: 0,
+        dbName: `PlantController-Lemon-Haze-Buds`,
+        version: 1,
+    }
 ]
 ```
 
