@@ -6,22 +6,18 @@ import {
     PLANTCONTROLLER_DATABASE,
     PLANTCONTROLLER_SETTINGS,
     PLANTCONTROLLER_TRANSLATIONS,
-} from './index';
-import { ServerTextLabelController } from '../../server/streamers/textlabel';
-import { ServerObjectController } from '../../server/streamers/object';
-import { DiscordController } from '../../server/systems/discord';
-import { InteractionController } from '../../server/systems/interaction';
-import { sha256Random } from '../../server/utility/encryption';
-import { ItemFactory } from '../../server/systems/item';
-<<<<<<<< HEAD:AthenaPlantController/controller.ts
-import { buds, plantItems, seeds } from './src/serverItems';
-========
-import { buds, PLANTCONTROLLER_ITEMS, seeds } from './src/server-items';
->>>>>>>> e1c4d8669de3e2a1da56bf660b53d554945a066c:athena-plant-controller/PlantController.ts
+} from '../index';
+import { ServerTextLabelController } from '../../../server/streamers/textlabel';
+import { ServerObjectController } from '../../../server/streamers/object';
+import { DiscordController } from '../../../server/systems/discord';
+import { InteractionController } from '../../../server/systems/interaction';
+import { sha256Random } from '../../../server/utility/encryption';
+import { ItemFactory } from '../../../server/systems/item';
+import { buds, plantItems, seeds } from './serverItems';
 
-import { ANIMATION_FLAGS } from '../../shared/flags/animationFlags';
-import IPlants from './src/interfaces/IPlants';
-import { playerFuncs } from '../../server/extensions/extPlayer';
+import { ANIMATION_FLAGS } from '../../../shared/flags/animationFlags';
+import IPlants from './interfaces/IPlants';
+import { playerFuncs } from '../../../server/extensions/extPlayer';
 
 export class PlantController implements IPlants {
     _id: string;
@@ -114,7 +110,6 @@ export class PlantController implements IPlants {
     private static async createSeedingInteraction(plant: IPlants) {
         if (!plant.data.seeds) {
             InteractionController.add({
-<<<<<<<< HEAD:AthenaPlantController/controller.ts
                 uid: plant.shaIdentifier,
                 description: `${PLANTCONTROLLER_TRANSLATIONS.seedingInteraction}`,
                 position: { x: plant.position.x, y: plant.position.y, z: plant.position.z },
@@ -178,84 +173,16 @@ export class PlantController implements IPlants {
                                 playerFuncs.inventory.toolbarRemove(player, player.data.toolbar[hasSeeds.index].slot);
                                 playerFuncs.save.field(player, 'toolbar', player.data.toolbar);
                                 playerFuncs.sync.inventory(player);
-========
-                uid: data.shaIdentifier,
-                description: `${PLANTCONTROLLER_TRANSLATIONS.seedingInteraction}`,
-                position: { x: data.position.x, y: data.position.y, z: data.position.z },
-                range: PLANTCONTROLLER_SETTINGS.interactionRange,
-                callback: (player: alt.Player) => {
-                    seeds.forEach(async (seed, i) => {
-                        const itemToSeed = await ItemFactory.get(seed.name);
-                        const hasSeeds = playerFuncs.inventory.isInToolbar(player, { name: itemToSeed.name });
-
-                        if (hasSeeds) {
-                            if (
-                                PLANTCONTROLLER_ANIMATIONS.seedingAnimName != 'default' &&
-                                PLANTCONTROLLER_ANIMATIONS.seedingAnimDict != 'default'
-                            ) {
-                                playerFuncs.emit.animation(
-                                    player,
-                                    PLANTCONTROLLER_ANIMATIONS.seedingAnimDict,
-                                    PLANTCONTROLLER_ANIMATIONS.seedingAnimName,
-                                    ANIMATION_FLAGS.NORMAL,
-                                    PLANTCONTROLLER_ANIMATIONS.seedingAnimDuration,
-                                );
-                                alt.setTimeout(() => {
-                                    data.data.seeds = true;
-                                    data.data.state = PLANTCONTROLLER_TRANSLATIONS.fertilizerRequired;
-                                    data.data.type = itemToSeed.data.type;
-                                    data.data.variety = itemToSeed.data.variety;
-                                    data.data.remaining = itemToSeed.data.time;
-                                    data.data.startTime = itemToSeed.data.time;
-
-                                    this.updatePlant(data._id, data);
-                                    player.data.toolbar[hasSeeds.index].quantity -= 1;
-                                    if (player.data.toolbar[hasSeeds.index].quantity <= 1) {
-                                        playerFuncs.inventory.toolbarRemove(player, hasSeeds.index);
-                                    }
-
-                                    playerFuncs.save.field(player, 'toolbar', player.data.toolbar);
-                                    playerFuncs.sync.inventory(player);
-
-                                    this.createFertilizingInteraction(data);
-                                    return;
-                                }, PLANTCONTROLLER_ANIMATIONS.seedingAnimDuration);
-                            } else {
-                                data.data.seeds = true;
-                                data.data.state = PLANTCONTROLLER_TRANSLATIONS.fertilizerRequired;
-                                data.data.type = itemToSeed.data.type;
-                                data.data.variety = itemToSeed.data.variety;
-                                data.data.remaining = itemToSeed.data.time;
-                                data.data.startTime = itemToSeed.data.time;
-
-                                this.updatePlant(data._id, data);
-
-                                player.data.toolbar[hasSeeds.index].quantity -= 1;
-                                playerFuncs.save.field(player, 'toolbar', player.data.toolbar);
-                                playerFuncs.sync.inventory(player);
-                                if (player.data.toolbar[hasSeeds.index].quantity == 1) {
-                                    playerFuncs.inventory.toolbarRemove(player, hasSeeds.index);
-                                    playerFuncs.save.field(player, 'toolbar', player.data.toolbar);
-                                    playerFuncs.sync.inventory(player);
-                                    return;
-                                }
-
-                                this.createFertilizingInteraction(data);
->>>>>>>> e1c4d8669de3e2a1da56bf660b53d554945a066c:athena-plant-controller/PlantController.ts
                                 return;
                             }
 
                             this.createFertilizingInteraction(plant);
                             return;
                         }
-<<<<<<<< HEAD:AthenaPlantController/controller.ts
                     } else {
                         playerFuncs.emit.notification(player, `No Seeds or move Seeds to Toolbar Slot 1`);
                         return;
                     }
-========
-                    });
->>>>>>>> e1c4d8669de3e2a1da56bf660b53d554945a066c:athena-plant-controller/PlantController.ts
                 },
             });
         }
@@ -271,15 +198,9 @@ export class PlantController implements IPlants {
         this.removeInteraction(plant);
         if (!plant.data.fertilized) {
             InteractionController.add({
-<<<<<<<< HEAD:AthenaPlantController/controller.ts
                 uid: plant.shaIdentifier,
                 description: `${PLANTCONTROLLER_TRANSLATIONS.fertilizingInteraction}`,
                 position: plant.position,
-========
-                uid: data.shaIdentifier,
-                description: `${PLANTCONTROLLER_TRANSLATIONS.fertilizingInteraction}`,
-                position: data.position,
->>>>>>>> e1c4d8669de3e2a1da56bf660b53d554945a066c:athena-plant-controller/PlantController.ts
                 range: PLANTCONTROLLER_SETTINGS.interactionRange,
                 callback: async (player: alt.Player) => {
                     const fertilizerItem = await ItemFactory.getByName(`Fertilizer`);
@@ -336,15 +257,9 @@ export class PlantController implements IPlants {
         this.removeInteraction(plant);
         if (plant.data.seeds && plant.data.fertilized && plant.data.water <= 30) {
             InteractionController.add({
-<<<<<<<< HEAD:AthenaPlantController/controller.ts
                 uid: plant.shaIdentifier,
                 description: `${PLANTCONTROLLER_TRANSLATIONS.waterInteraction}`,
                 position: plant.position,
-========
-                uid: data.shaIdentifier,
-                description: `${PLANTCONTROLLER_TRANSLATIONS.waterInteraction}`,
-                position: data.position,
->>>>>>>> e1c4d8669de3e2a1da56bf660b53d554945a066c:athena-plant-controller/PlantController.ts
                 range: PLANTCONTROLLER_SETTINGS.interactionRange,
                 callback: async (player: alt.Player) => {
                     const itemToWater = await ItemFactory.getByName(`Plantwater`);
@@ -549,11 +464,7 @@ export class PlantController implements IPlants {
      */
     private static async createHarvestInteraction(plant: IPlants) {
         InteractionController.add({
-<<<<<<<< HEAD:AthenaPlantController/controller.ts
             uid: plant.shaIdentifier,
-========
-            uid: data.shaIdentifier,
->>>>>>>> e1c4d8669de3e2a1da56bf660b53d554945a066c:athena-plant-controller/PlantController.ts
             description: 'Harvest',
             position: plant.position as alt.Vector3,
             range: PLANTCONTROLLER_SETTINGS.interactionRange,

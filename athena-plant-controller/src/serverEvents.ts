@@ -7,12 +7,11 @@ import {
 } from '../index';
 import { Item } from '../../../shared/interfaces/item';
 import { getVectorInFrontOfPlayer } from '../../../server/utility/vector';
-import { PlantController } from '../controller';
+import { PlantController } from './controller';
 import Database from '@stuyk/ezmongodb';
 import IPlants from './interfaces/IPlants';
 import { ITEM_TYPE } from '../../../shared/enums/itemTypes';
 import { ItemFactory } from '../../../server/systems/item';
-import { plantItems } from './serverItems';
 import { playerFuncs } from '../../../server/extensions/extPlayer';
 
 /**
@@ -36,7 +35,6 @@ alt.on('PlantController:Server:CreatePot', async (player: alt.Player, data: Item
                     player.data.inventory[potInInventory.index].quantity += 1;
                     playerFuncs.save.field(player, 'inventory', player.data.inventory);
                     playerFuncs.sync.inventory(player);
-                    alt.log('Too close to plants ' + JSON.stringify(potItem.behavior) + ' | ' + potItem.quantity);
                     return;
                 }
             }
@@ -52,7 +50,7 @@ alt.on('PlantController:Server:CreatePot', async (player: alt.Player, data: Item
         }
     }
     if (!PLANTCONTROLLER_SETTINGS.allowInterior) {
-        if (player.data.interior != '0' && player.dimension != 0) return;
+        if (!player.data.interior && player.dimension != 0) return;
     }
 
     if (PLANTCONTROLLER_SETTINGS.useSpots) {
