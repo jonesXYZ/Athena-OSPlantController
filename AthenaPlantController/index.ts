@@ -4,9 +4,9 @@ import { PluginSystem } from '../../server/systems/plugins';
 import { ServerBlipController } from '../../server/systems/blip';
 import { SYSTEM_EVENTS } from '../../shared/enums/system';
 
-import './src/server-events';
-import './src/items/server-items';
-import { PlantController } from './PlantController';
+import './src/serverEvents';
+import './src/serverItems';
+import { PlantController } from './controller';
 
 export const ATHENA_PLANTCONTROLLER = {
     name: 'PlantController',
@@ -23,10 +23,10 @@ export const PLANTCONTROLLER_SETTINGS = {
     smallPot: 'bkr_prop_weed_01_small_01a', // LEAVE ME ALONE
     mediumPot: 'bkr_prop_weed_med_01a', // LEAVE ME ALONE
     largePot: 'bkr_prop_weed_lrg_01a', // LEAVE ME ALONE
-    useSpots: true, // Use configured Spots? Highly recommend for now.
+    useSpots: true, // Use configured Spots?
     updateInterval: 3000, // Used to set the timer's update Interval.
     allowInterior: false, // Allow in Interior / Other dimensions which are not null?
-    distanceToSpot: 25,
+    distanceToSpot: 10,
     distanceBetweenPlants: 2,
     interactionRange: 0.8,
     textLabelDistance: 3,
@@ -88,16 +88,16 @@ PluginSystem.registerPlugin(ATHENA_PLANTCONTROLLER.name, async () => {
 });
 
 alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, () => {
-    if(PLANTCONTROLLER_SETTINGS.useSpots) {
-        for(let i = 0; i < PLANTCONTROLLER_SPOTS.length; i++)
-        {
+    if (PLANTCONTROLLER_SETTINGS.useSpots) {
+        for (let i = 0; i < PLANTCONTROLLER_SPOTS.length; i++) {
+            let currentPlantspot = PLANTCONTROLLER_SPOTS[i];
             ServerBlipController.append({
                 shortRange: true,
                 sprite: 469,
                 color: 2,
                 text: 'Plant Spot',
                 scale: 1,
-                pos: PLANTCONTROLLER_SPOTS[i],
+                pos: currentPlantspot,
                 uid: `Blip-${i}`,
             });
         }
