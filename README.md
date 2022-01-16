@@ -159,3 +159,4 @@ alt.on('PlantController:Server:CreatePot', (player: alt.Player, data: Item) => {
 
 ![image](https://user-images.githubusercontent.com/82890183/147868683-79228be4-8144-4fa6-bde4-5935c219e672.png)
 
+Join the plugin Discord -> https://discord.gg/swBPcKdzzy

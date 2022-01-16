@@ -4,9 +4,15 @@ import { PluginSystem } from '../../server/systems/plugins';
 import { ServerBlipController } from '../../server/systems/blip';
 import { SYSTEM_EVENTS } from '../../shared/enums/system';
 
+<<<<<<< HEAD:AthenaPlantController/index.ts
 import './src/serverEvents';
 import './src/serverItems';
 import { PlantController } from './controller';
+=======
+import './src/server-events';
+import './src/server-items';
+import { PlantController } from './PlantController';
+>>>>>>> e1c4d8669de3e2a1da56bf660b53d554945a066c:athena-plant-controller/index.ts
 
 export const ATHENA_PLANTCONTROLLER = {
     name: 'PlantController',
@@ -90,7 +96,10 @@ PluginSystem.registerPlugin(ATHENA_PLANTCONTROLLER.name, async () => {
 alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, () => {
     if (PLANTCONTROLLER_SETTINGS.useSpots) {
         for (let i = 0; i < PLANTCONTROLLER_SPOTS.length; i++) {
+<<<<<<< HEAD:AthenaPlantController/index.ts
             let currentPlantspot = PLANTCONTROLLER_SPOTS[i];
+=======
+>>>>>>> e1c4d8669de3e2a1da56bf660b53d554945a066c:athena-plant-controller/index.ts
             ServerBlipController.append({
                 shortRange: true,
                 sprite: 469,
