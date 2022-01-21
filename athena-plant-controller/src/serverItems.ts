@@ -46,6 +46,21 @@ export const plantItems: Array<Item> = [
         rarity: 0,
         dbName: `PlantController-Plantwater`,
         version: 1,
+    },
+    {
+        name: 'The-Harvester',
+        description: `PlantController - Some Description to show for debugging purposes.`,
+        icon: 'crate',
+        quantity: 1,
+        behavior:
+        ITEM_TYPE.CAN_DROP | ITEM_TYPE.CAN_TRADE | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.CONSUMABLE | ITEM_TYPE.CAN_STACK,
+        data: {
+            event: 'PlantController:Server:HarvestPot',
+            durability: 100,
+        },
+        rarity: 0,
+        dbName: `PlantController-The-Harvester`,
+        version: 1,
     }
 ];
 

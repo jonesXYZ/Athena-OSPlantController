@@ -108,6 +108,7 @@ export class PlantController implements IPlants {
                         model: PLANTCONTROLLER_SETTINGS.mediumPot,
                         uid: plant.data.shaIdentifier,
                     });
+                    plant.data.objectModel = PLANTCONTROLLER_SETTINGS.mediumPot;
                 }
 
                 if (plant.data.remaining === 0) {
@@ -118,6 +119,7 @@ export class PlantController implements IPlants {
                         uid: plant.data.shaIdentifier,
                     });
 
+                    plant.data.objectModel = PLANTCONTROLLER_SETTINGS.largePot;
                     plant.data.isHarvestable = true;
                     plant.data.state = '~g~HARVESTABLE';
                     await Database.updatePartialData(

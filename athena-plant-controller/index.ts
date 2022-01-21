@@ -28,11 +28,12 @@ export const PLANTCONTROLLER_SETTINGS = {
     mediumPot: 'bkr_prop_weed_med_01a', // LEAVE ME ALONE
     largePot: 'bkr_prop_weed_lrg_01a', // LEAVE ME ALONE
     useSpots: true, // Use configured Spots?
-    updateInterval: 3000, // Used to set the timer's update Interval.
+    updateInterval: 1000, // Used to set the timer's update Interval.
     allowInterior: false, // Allow in Interior / Other dimensions which are not null?
     distanceToSpot: 10,
     distanceBetweenPlants: 2,
     textLabelDistance: 3,
+    randomizeOutcome: true
 };
 
 export const animations: Array<Animation> = [
