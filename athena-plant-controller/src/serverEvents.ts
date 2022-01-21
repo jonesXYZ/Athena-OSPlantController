@@ -8,6 +8,10 @@ import { INVENTORY_TYPE } from '../../../shared/enums/inventoryTypes';
 import { ItemEffects } from '../../../server/systems/itemEffects';
 import { PlantController } from './controller';
 import IAttachable from '../../../shared/interfaces/iAttachable';
+import { ServerObjectController } from '../../../server/streamers/object';
+import { ServerTextLabelController } from '../../../server/streamers/textlabel';
+import { buds } from './serverItems';
+import { ItemFactory } from '../../../server/systems/item';
 
 ItemEffects.add(
     'PlantController:Server:CreatePot',
@@ -31,9 +35,11 @@ ItemEffects.add(
             PLANTCONTROLLER_SPOTS.forEach((spot) => {
                 if (player.pos.isInRange(spot, PLANTCONTROLLER_SETTINGS.distanceToSpot)) {
                     if (type === INVENTORY_TYPE.TOOLBAR) {
-                        item.quantity--;
-                        if (item.quantity <= 1) {
-                            playerFuncs.inventory.toolbarRemove(player, item.slot);
+                        const index = player.data.toolbar.findIndex((i) => i && i.slot === item.slot)
+                        const realItem = player.data.toolbar[index];
+                        realItem.quantity --;
+                        if (realItem.quantity <= 1) {
+                            playerFuncs.inventory.toolbarRemove(player, realItem.slot);
                         }
                         const objToAttach: IAttachable = {
                             bone: 57005,
@@ -49,9 +55,9 @@ ItemEffects.add(
                             animations[0].flags,
                             5000,
                         );
+                        resyncInventory(player);
                         alt.setTimeout(() => {
                             PlantController.addPlant(player, 'Requires Seeds.');
-                            resyncInventory(player);
                         }, 5000);
                     } else {
                         playerFuncs.emit.notification(player, `Only works in Toolbar.`);
@@ -79,10 +85,13 @@ ItemEffects.add(
                 plant.types.type === 'N/A'
             ) {
                 if (type === INVENTORY_TYPE.TOOLBAR) {
-                    item.quantity--;
-                    if (item.quantity <= 1) {
-                        playerFuncs.inventory.toolbarRemove(player, item.slot);
+                    const index = player.data.toolbar.findIndex((i) => i && i.slot === item.slot)
+                    const realItem = player.data.toolbar[index];
+                    realItem.quantity --;
+                    if (realItem.quantity <= 1) {
+                        playerFuncs.inventory.toolbarRemove(player, realItem.slot);
                     }
+                    alt.log(item.quantity);
                     const objToAttach: IAttachable = {
                         bone: 57005,
                         model: 'prop_cs_trowel',
@@ -136,10 +145,13 @@ ItemEffects.add(
         data.forEach(async (plant) => {
             if (player.pos.isInRange(plant.position, 1.5) && plant.data.isFertilized === false) {
                 if (type === INVENTORY_TYPE.TOOLBAR) {
-                    item.quantity--;
-                    if (item.quantity <= 1) {
-                        playerFuncs.inventory.toolbarRemove(player, item.slot);
+                    const index = player.data.toolbar.findIndex((i) => i && i.slot === item.slot)
+                    const realItem = player.data.toolbar[index];
+                    realItem.quantity --;
+                    if (realItem.quantity <= 1) {
+                        playerFuncs.inventory.toolbarRemove(player, realItem.slot);
                     }
+                    alt.log(item.quantity);
                     const objToAttach: IAttachable = {
                         bone: 57005,
                         model: 'prop_cs_trowel',
@@ -185,10 +197,13 @@ ItemEffects.add(
         data.forEach(async (plant) => {
             if (player.pos.isInRange(plant.position, 1.5) && plant.data.isFertilized === true) {
                 if (type === INVENTORY_TYPE.TOOLBAR) {
-                    item.quantity--;
+                    const index = player.data.toolbar.findIndex((i) => i && i.slot === item.slot)
+                    const realItem = player.data.toolbar[index];
+                    realItem.quantity--;
                     if (item.quantity <= 1) {
-                        playerFuncs.inventory.toolbarRemove(player, item.slot);
+                        playerFuncs.inventory.toolbarRemove(player, realItem.slot);
                     }
+                    alt.log(item.quantity);
                     const objToAttach: IAttachable = {
                         bone: 57005,
                         model: 'prop_wateringcan',
@@ -219,8 +234,56 @@ ItemEffects.add(
     },
 );
 
+ItemEffects.add('PlantController-HarvestPot', async (player: alt.Player, item: Item, slot: number, type: INVENTORY_TYPE) => {
+    if (!item) return;
+
+    if (!PLANTCONTROLLER_SETTINGS.allowInterior) {
+        if (player.data.interior || player.dimension != 0) return;
+    }
+
+    const data = await Database.fetchAllData<IPlants>(ATHENA_PLANTCONTROLLER.collection);
+    const emptySlot = playerFuncs.inventory.getFreeInventorySlot(player);
+    data.forEach(async (plant) => { 
+        if (player.pos.isInRange(plant.position, 1.5) && plant.data.isHarvestable === true) {
+            if (type === INVENTORY_TYPE.TOOLBAR) {
+                const index = player.data.toolbar.findIndex((i) => i && i.slot === item.slot)
+                const realItem = player.data.toolbar[index];
+                realItem.data.durability --;
+                if(realItem.data.durability <= 1) {
+                    playerFuncs.inventory.toolbarRemove(player, realItem.slot);
+                }
+                buds.forEach(async (bud) => {
+                    if(bud.data.variety === plant.types.variety && bud.data.type === plant.types.type) {
+                        const budAdd = await ItemFactory.get(bud.dbName);
+                        if(PLANTCONTROLLER_SETTINGS.randomizeOutcome) {
+                            const rndAmount = getRandomInt(0, budAdd.quantity);
+                            budAdd.quantity = rndAmount;
+                            playerFuncs.inventory.inventoryAdd(player, budAdd, emptySlot.slot);
+                        } else {
+                            playerFuncs.inventory.inventoryAdd(player, budAdd, emptySlot.slot);
+                        }
+                        resyncInventory(player);
+                    }
+                });
+                ServerObjectController.remove(plant.data.shaIdentifier);
+                ServerTextLabelController.remove(plant.data.shaIdentifier);
+            } else {
+                playerFuncs.emit.notification(player, `Only works in Toolbar.`);
+                return;
+            }
+        }
+    });
+});
+
 function resyncInventory(player: alt.Player) {
     playerFuncs.save.field(player, 'inventory', player.data.inventory);
     playerFuncs.save.field(player, 'toolbar', player.data.toolbar);
     playerFuncs.sync.inventory(player);
+    alt.log(JSON.stringify(player.data.toolbar));
+}
+
+function getRandomInt(min: number, max: number) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;
 }
