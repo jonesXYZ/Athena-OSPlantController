@@ -1,19 +1,29 @@
 import * as alt from 'alt-server';
+
 export default interface IPlants {
     _id?: string;
-    shaIdentifier: string;
-    model: string;
+    owner: string;
+
     data: {
-        owner?: string;
-        variety?: string;
-        type?: string;
-        seeds?: boolean;
-        fertilized?: boolean;
-        state?: string;
+        shaIdentifier: string;
+        objectModel: string;
+        state: string;
+        interior: string;
+
+        isSeeds: boolean;
+        isFertilized: boolean;
+        isHarvestable: boolean;
+
+        water: number;
+        required: number;
         remaining: number;
-        startTime: number;
-        water?: number;
-        harvestable?: boolean;
-    };
+        dimension: number;
+    }
+
+    types: {
+        type: string;
+        variety: string;
+    }
+
     position: alt.Vector3;
 }
