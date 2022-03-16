@@ -16,6 +16,8 @@ export class PlantController {
             isFertilized: false,
             water: 0,
             isHarvestable: false,
+            dimension: 0,
+            interior: null,
             position: { x: player.pos.x, y: player.pos.y, z: player.pos.z } as alt.Vector3,
         };
 
