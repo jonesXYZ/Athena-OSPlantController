@@ -1,4 +1,4 @@
-import { Vector3 } from "alt-server";
+import { Vector3 } from 'alt-server';
 
 export default interface iPlant {
     _id?: string;
@@ -6,14 +6,24 @@ export default interface iPlant {
     plants: Array<iPlantData>;
 }
 
-export interface iPlantData  {
+export interface iPlantData {
     _id?: string;
-    object: string;
-    isSeeds: boolean;
-    isFertilized: boolean;
-    water: number;
-    isHarvestable: boolean;
-    dimension: number;
-    interior: string;
+    model: string;
+    data: {
+        water: number;
+        type: string;
+        variety: string;
+        time: number;
+    }
+    general: {
+        dimension: number;
+        interior: string;
+        faction?: number | string | null;
+    };
+    states: {
+        isSeeds: boolean;
+        isFertilized: boolean;
+        isHarvestable: boolean;
+    };
     position: Vector3;
 }

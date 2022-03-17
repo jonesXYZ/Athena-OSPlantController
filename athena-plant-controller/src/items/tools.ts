@@ -1,29 +1,27 @@
-import * as alt from 'alt-server';
-
-import { ITEM_TYPE } from '../../../shared/enums/itemTypes';
-import { Item } from '../../../shared/interfaces/item';
-import { ItemFactory } from '../../../server/systems/item';
+import { ITEM_TYPE } from '../../../../shared/enums/itemTypes';
+import { Item } from '../../../../shared/interfaces/item';
 
 // Event Exports.
 export enum PLANT_EVENTS {
     GROW_PLANT = 'PC:Server:GrowPlant',
     SEED_PLANT = 'PC:Server:SeedPlant',
     FERTILIZE_PLANT = 'PC:Server:FertilizePlant',
-    WATER_PLANT = 'PC:Server:WaterPlant'
+    WATER_PLANT = 'PC:Server:WaterPlant',
 }
 
-const plantItems: Array<Item> = [
+export const plantTools: Array<Item> = [
     {
         name: 'Plant Pot',
         icon: 'crate',
         description: 'Used to grow some plants.',
-        behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CONSUMABLE,
+        behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CONSUMABLE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.IS_TOOLBAR,
         data: {
             event: PLANT_EVENTS.GROW_PLANT,
+            // faction: 'YourFaction'
         },
         quantity: 1,
         dbName: 'PlantController-Pot',
-        version: 1
+        version: 1,
     },
     {
         name: 'Fertilizer',
@@ -35,7 +33,7 @@ const plantItems: Array<Item> = [
         },
         quantity: 1,
         dbName: 'PlantController-Fertilizer',
-        version: 1
+        version: 1,
     },
     {
         name: 'Plantwater',
@@ -47,16 +45,6 @@ const plantItems: Array<Item> = [
         },
         quantity: 1,
         dbName: 'PlantController-Plantwater',
-        version: 1
+        version: 1,
     },
 ];
-
-for (let x in plantItems) {
-    const itemExist = await ItemFactory.getByName(plantItems[x].name);
-    if (!itemExist) {
-        const addedItem = await ItemFactory.add(plantItems[x]);
-        alt.logWarning(`PlantController => Successfully added ${addedItem.name} to the ItemFactory Database.`);
-    } else {
-        alt.logWarning(`PlantController => Skipped some Items during Bootup Enable Entry, because they already exist.`);
-    }
-}
