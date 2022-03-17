@@ -11,6 +11,7 @@ export const Plant_Controller = {
     name: 'PlantController',
     version: 'v1.0',
     collection: 'plants',
+    updateTime: 60000, // One Minute
 };
 
 PluginSystem.registerPlugin(Plant_Controller.name, async () => {

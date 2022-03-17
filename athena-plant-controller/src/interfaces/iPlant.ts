@@ -7,10 +7,13 @@ export default interface iPlant {
 }
 
 export interface iPlantData  {
+    _id?: string;
     object: string;
     isSeeds: boolean;
     isFertilized: boolean;
     water: number;
     isHarvestable: boolean;
+    dimension: number;
+    interior: string;
     position: Vector3;
 }

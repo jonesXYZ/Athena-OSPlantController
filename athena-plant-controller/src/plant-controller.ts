@@ -6,8 +6,19 @@ import iPlant, { iPlantData } from './interfaces/iPlant';
 import { ServerObjectController } from '../../../server/streamers/object';
 import { playerFuncs } from '../../../server/extensions/extPlayer';
 
-export class PlantController {
+export class PlantController implements iPlant {
+    _id?: string;
+    owner: string;
+    plants: iPlantData[];
+    
+    constructor(data: iPlant) {
+        this._id = data._id;
+        this.owner = data.owner;
+        this.plants = data.plants;
+    }
+
     public static async growPlant(player: alt.Player) {
+        // const hasPlantPot = playerFuncs.inventory.isInInventory(player, )
         const vectorInFront = playerFuncs.utility.getPositionFrontOf(player, 1);
         const data = await Database.fetchData<iPlant>('owner', player.data.name, Plant_Controller.collection);
         const plantDocument: iPlantData = {
@@ -40,7 +51,19 @@ export class PlantController {
         alt.log(updated);
     }
 
-    public static async harvestPlant(player: alt.Player, plant: iPlantData) {}
+    public static async seedPlant(player: alt.Player) {
+
+    }
+
+    public static async fertilizePlant(player: alt.Player) {
+
+    }
+
+    public static async waterPlant(player: alt.Player) {
+
+    }
+
+    public static async harvestPlant(player: alt.Player) {}
 
     private static refreshObjects() {}
 
