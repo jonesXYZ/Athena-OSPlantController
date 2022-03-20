@@ -12,7 +12,8 @@ export const OSPlants = {
     version: 'v1.0',
     collection: 'plants',
     updateTime: 60000, // One Minute
-    everyoneCanInteract: false,
+    textLabelDistance: 5,
+    objectDistance: 5,
 };
 
 PluginSystem.registerPlugin(OSPlants.name, async () => {

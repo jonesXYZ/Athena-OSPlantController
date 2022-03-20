@@ -8,7 +8,6 @@ export default interface iPlant {
 
 export interface iPlantData {
     _id?: string;
-    model: string;
     data: {
         water: number;
         type: string;
@@ -20,6 +19,13 @@ export interface iPlantData {
         interior: string;
         faction?: number | string | null;
     };
+    object: {
+        model: string;
+    },
+    textLabel: {
+        data: string;
+        position: Vector3;
+    }
     states: {
         isSeeds: boolean;
         isFertilized: boolean;

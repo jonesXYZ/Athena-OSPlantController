@@ -14,7 +14,7 @@ export const plantTools: Array<Item> = [
         name: 'Plant Pot',
         icon: 'crate',
         description: 'Used to grow some plants.',
-        behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CONSUMABLE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.IS_TOOLBAR,
+        behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CONSUMABLE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.CAN_STACK,
         data: {
             event: PLANT_EVENTS.GROW_PLANT,
             // faction: 'YourFaction'
