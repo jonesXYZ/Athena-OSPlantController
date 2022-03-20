@@ -6,7 +6,8 @@ import { playerFuncs } from '../../../server/extensions/extPlayer';
 import { sha256 } from '../../../server/utility/encryption';
 import { SYSTEM_EVENTS } from '../../../shared/enums/system';
 import { OSPlants } from '../index';
-import { createLabelAndObject } from './functions';
+import { ServerTextLabelController } from '../../../server/streamers/textlabel';
+import { ObjectId } from 'bson';
 
 export class PlantController implements iPlant {
     _id?: string;
@@ -21,10 +22,12 @@ export class PlantController implements iPlant {
 
     public static async growPlant(player: alt.Player, faction?: string | number) {
         if (!player || !player.valid) return;
-
+        
+        let generatedUuid = new ObjectId();
         const vectorInFront = playerFuncs.utility.getPositionFrontOf(player, 1);
         const data = await Database.fetchData<iPlant>('owner', player.data.name, OSPlants.collection);
         const plantDocument: iPlantData = {
+            _id: generatedUuid.toString(),
             model: 'bkr_prop_weed_01_small_01a',
             data: {
                 time: 0,
@@ -45,11 +48,16 @@ export class PlantController implements iPlant {
             position: { x: player.pos.x, y: player.pos.y, z: player.pos.z - 1 } as alt.Vector3,
         };
 
-        createLabelAndObject({
-            pos: vectorInFront,
-            uid: sha256(player.data.name),
-            description: 'Funny Textlabel. ;)',
+        ServerObjectController.append({
+            pos: { x: vectorInFront.x, y: vectorInFront.y, z: vectorInFront.z - 1 },
             model: plantDocument.model,
+            uid: generatedUuid.toString(),
+        });
+
+        ServerTextLabelController.append({
+            pos: { x: vectorInFront.x, y: vectorInFront.y, z: vectorInFront.z - 0.5 },
+            data: 'Testing...',
+            uid: generatedUuid.toString(),
         });
 
         data.plants.push({ ...plantDocument });
@@ -68,21 +76,20 @@ export class PlantController implements iPlant {
 
     private static refreshLabels() {}
 
-    static async handleBootup() {
+    /* static async handleBootup() {
         const allPlants = await Database.fetchAllData<iPlant>(OSPlants.collection);
         for (let x = 0; x < allPlants.length; x++) {
-            const data = allPlants[x];
-            if (data.plants) {
+            const plantsToCreate = allPlants[x].plants;
+            if(plantsToCreate.length > 0) {
                 ServerObjectController.append({
-                    model: data.plants[x].model.toString(),
-                    pos: data.plants[x].position,
-                    uid: `${sha256(data.owner)}`,
+                    model: plantsToCreate[x].model,
+                    pos: plantsToCreate[x].position,
+                    uid: plantsToCreate[x]._id,
                 });
-            }
+            } else continue;
+            alt.logWarning(`PlantController => ${plantsToCreate.length} plants were loaded on Bootup entry.`);
         }
-        alt.logWarning(`PlantController => ${allPlants.length} plants were loaded on Bootup entry.`);
-    }
+    } */
 }
 
-alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, PlantController.handleBootup);
-
+// alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, PlantController.handleBootup);
