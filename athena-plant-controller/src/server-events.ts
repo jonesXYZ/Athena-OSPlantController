@@ -34,7 +34,6 @@ ItemEffects.add(PLANT_EVENTS.GROW_PLANT, (player: alt.Player, item: Item, slot: 
 
 alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, async () => {
     const playerPlantDocument = await Database.fetchAllData<iPlant>(OSPlants.collection);
-
     for (let x = 0; x < playerPlantDocument.length; x++) {
         let plantsToAdd = [...playerPlantDocument[x].plants];
         plantsToAdd.forEach((entry, index) => {

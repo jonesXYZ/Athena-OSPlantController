@@ -6,12 +6,17 @@ import { playerFuncs } from '../../../server/extensions/extPlayer';
 import { OSPlants } from '../index';
 import { ServerTextLabelController } from '../../../server/streamers/textlabel';
 import { ObjectId } from 'bson';
+import { InteractionController } from '../../../server/systems/interaction';
 
 export class PlantController implements iPlant {
     _id?: string;
     owner: string;
     plants: iPlantData[];
 
+    /**
+     * It creates a new Plant object from the data that was passed in.
+     * @param {iPlant} data - iPlant
+     */
     constructor(data: iPlant) {
         this._id = data._id;
         this.owner = data.owner;
@@ -68,21 +73,30 @@ export class PlantController implements iPlant {
             maxDistance: OSPlants.textLabelDistance,
         });
 
+        InteractionController.add({
+            position: plantDocument.position,
+            description: 'Test...',
+            callback: async (player: alt.Player) => {
+                const returnedPlant = await PlantController.isPlayerInRangeOfPlant(player);
+                console.log(JSON.stringify(returnedPlant));
+            },
+        });
+
         data.plants.push({ ...plantDocument });
         await Database.updatePartialData(data._id, { plants: data.plants }, OSPlants.collection);
     }
 
-    public static async seedPlant(player: alt.Player) {}
-
-    public static async fertilizePlant(player: alt.Player) {}
-
-    public static async waterPlant(player: alt.Player) {}
-
-    public static async harvestPlant(player: alt.Player) {}
-
-    public static async testHarvest(player: alt.Player, data: iPlant) {}
-
-    private static refreshObjects() {}
-
-    private static refreshLabels() {}
+    private static async isPlayerInRangeOfPlant(player: alt.Player): Promise<iPlantData> {
+        const playerPlantDocument = await Database.fetchAllData<iPlant>(OSPlants.collection);
+        let returnedData: iPlantData = null;
+        for (let x = 0; x < playerPlantDocument.length; x++) {
+            const plantsForCheck = [...playerPlantDocument[x].plants];
+            plantsForCheck.forEach((entry) => {
+                if(player.pos.isInRange(entry.position, 2)) {
+                    returnedData = entry;
+                } else return null;
+            });
+        }
+        return returnedData;
+    }
 }
