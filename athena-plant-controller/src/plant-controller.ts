@@ -77,7 +77,7 @@ export class PlantController implements iPlant {
             position: plantDocument.position,
             description: 'Test...',
             callback: async (player: alt.Player) => {
-                const returnedPlant = await PlantController.isPlayerInRangeOfPlant(player);
+                const returnedPlant = await PlantController.isPlayerInRangeOfPlant(player, 3);
                 console.log(JSON.stringify(returnedPlant));
             },
         });
@@ -86,13 +86,13 @@ export class PlantController implements iPlant {
         await Database.updatePartialData(data._id, { plants: data.plants }, OSPlants.collection);
     }
 
-    private static async isPlayerInRangeOfPlant(player: alt.Player): Promise<iPlantData> {
+    public static async isPlayerInRangeOfPlant(player: alt.Player, range: number): Promise<iPlantData> {
         const playerPlantDocument = await Database.fetchAllData<iPlant>(OSPlants.collection);
         let returnedData: iPlantData = null;
         for (let x = 0; x < playerPlantDocument.length; x++) {
             const plantsForCheck = [...playerPlantDocument[x].plants];
             plantsForCheck.forEach((entry) => {
-                if(player.pos.isInRange(entry.position, 2)) {
+                if(player.pos.isInRange(entry.position, range)) {
                     returnedData = entry;
                 } else return null;
             });

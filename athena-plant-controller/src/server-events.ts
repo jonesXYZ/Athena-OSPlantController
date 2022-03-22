@@ -12,10 +12,15 @@ import iPlant from './interfaces/iPlant';
 import { PLANT_EVENTS } from './items/tools';
 import { PlantController } from './plant-controller';
 
-ItemEffects.add(PLANT_EVENTS.GROW_PLANT, (player: alt.Player, item: Item, slot: number, type: INVENTORY_TYPE) => {
+ItemEffects.add(PLANT_EVENTS.GROW_PLANT, async (player: alt.Player, item: Item, slot: number, type: INVENTORY_TYPE) => {
     const isToolbar = playerFuncs.inventory.isInToolbar(player, { name: item.name });
     if (!isToolbar) {
         playerFuncs.emit.notification(player, `Item should be in Toolbar.`);
+        return;
+    }
+
+    if(await PlantController.isPlayerInRangeOfPlant(player, 3)) {
+        playerFuncs.emit.notification(player, `Standing to close to another plant!`);
         return;
     }
 
