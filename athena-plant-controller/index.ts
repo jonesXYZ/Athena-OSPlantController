@@ -14,6 +14,8 @@ export const OSPlants = {
     updateTime: 60000, // One Minute
     textLabelDistance: 5,
     objectDistance: 5,
+    everyoneCanInteract: false,
+    plantsPerPlayer: -1, // Place whatever you want
 };
 
 PluginSystem.registerPlugin(OSPlants.name, async () => {

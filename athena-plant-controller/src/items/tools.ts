@@ -1,13 +1,6 @@
 import { ITEM_TYPE } from '../../../../shared/enums/itemTypes';
 import { Item } from '../../../../shared/interfaces/item';
-
-// Event Exports.
-export enum PLANT_EVENTS {
-    GROW_PLANT = 'PC:Server:GrowPlant',
-    SEED_PLANT = 'PC:Server:SeedPlant',
-    FERTILIZE_PLANT = 'PC:Server:FertilizePlant',
-    WATER_PLANT = 'PC:Server:WaterPlant',
-}
+import { TOOL_EVENTS } from '../lists/event-names';
 
 export const plantTools: Array<Item> = [
     {
@@ -16,8 +9,8 @@ export const plantTools: Array<Item> = [
         description: 'Used to grow some plants.',
         behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CONSUMABLE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.CAN_STACK,
         data: {
-            event: PLANT_EVENTS.GROW_PLANT,
-            // faction: 'YourFaction'
+            event: TOOL_EVENTS.GROW_PLANT,
+            // faction: 'YourFaction' | Need to think about this further.
         },
         quantity: 1,
         dbName: 'PlantController-Pot',
@@ -29,7 +22,7 @@ export const plantTools: Array<Item> = [
         description: 'Used to fertilize plants.',
         behavior: ITEM_TYPE.CAN_DROP,
         data: {
-            event: PLANT_EVENTS.FERTILIZE_PLANT,
+            event: TOOL_EVENTS.FERTILIZE_PLANT,
         },
         quantity: 1,
         dbName: 'PlantController-Fertilizer',
@@ -41,10 +34,22 @@ export const plantTools: Array<Item> = [
         description: 'Used to water plants.',
         behavior: ITEM_TYPE.CAN_DROP,
         data: {
-            event: PLANT_EVENTS.WATER_PLANT,
+            event: TOOL_EVENTS.WATER_PLANT,
         },
         quantity: 1,
         dbName: 'PlantController-Plantwater',
         version: 1,
     },
+    {
+        name: 'Plant Harvester',
+        icon: 'crate',
+        description: 'Used to harvest plants.',
+        behavior: ITEM_TYPE.CAN_DROP,
+        data: {
+            event: TOOL_EVENTS.WATER_PLANT,
+        },
+        quantity: 1,
+        dbName: 'PlantController-Plantharvester',
+        version: 1,
+    }
 ];

@@ -1,6 +1,7 @@
 import Database from '@stuyk/ezmongodb';
 import * as alt from 'alt-server';
 import { OSPlants } from '..';
+import { PolygonShape } from '../../../server/extensions/extColshape';
 import { playerFuncs } from '../../../server/extensions/extPlayer';
 import { ServerObjectController } from '../../../server/streamers/object';
 import { ServerTextLabelController } from '../../../server/streamers/textlabel';
@@ -9,10 +10,11 @@ import { INVENTORY_TYPE } from '../../../shared/enums/inventoryTypes';
 import { SYSTEM_EVENTS } from '../../../shared/enums/system';
 import { Item } from '../../../shared/interfaces/item';
 import iPlant from './interfaces/iPlant';
-import { PLANT_EVENTS } from './items/tools';
+import { TOOL_EVENTS } from './lists/event-names';
+import fields from './lists/fields';
 import { PlantController } from './plant-controller';
 
-ItemEffects.add(PLANT_EVENTS.GROW_PLANT, async (player: alt.Player, item: Item, slot: number, type: INVENTORY_TYPE) => {
+ItemEffects.add(TOOL_EVENTS.GROW_PLANT, async (player: alt.Player, item: Item, slot: number, type: INVENTORY_TYPE) => {
     const isToolbar = playerFuncs.inventory.isInToolbar(player, { name: item.name });
     if (!isToolbar) {
         playerFuncs.emit.notification(player, `Item should be in Toolbar.`);
@@ -58,5 +60,28 @@ alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, async () => {
                 maxDistance: OSPlants.textLabelDistance,
             });
         });
+
+        for(let x = 0; x < fields.length; x++) {
+            const position = fields[x];
+            const polygon = new PolygonShape(position.z, position.z + 2.5, fields[x].vertices, true, false);
+            polygon.addEnterCallback((enter));
+            polygon.addLeaveCallback((leave));
+        }
     }
 });
+
+function  enter(polygon: PolygonShape, player: alt.Player) {
+    if (!(player instanceof alt.Player)) {
+        return;
+    }
+
+    playerFuncs.emit.notification(player, `Welcome to the Weed Field! Feel free to grow your plants.`);
+}
+
+function leave(polygon: PolygonShape, player: alt.Player) {
+    if(!(player instanceof alt.Player)) {
+        return;
+    }
+
+    playerFuncs.emit.notification(player, `You've left the weed field.`);
+}
