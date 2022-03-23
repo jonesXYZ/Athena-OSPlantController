@@ -7,6 +7,7 @@ import { OSPlants } from '../index';
 import { ServerTextLabelController } from '../../../server/streamers/textlabel';
 import { ObjectId } from 'bson';
 import { InteractionController } from '../../../server/systems/interaction';
+import { Item } from '../../../shared/interfaces/item';
 
 export class PlantController implements iPlant {
     _id?: string;
@@ -31,10 +32,10 @@ export class PlantController implements iPlant {
         const data = await Database.fetchData<iPlant>('owner', player.data.name, OSPlants.collection);
         const plantDocument: iPlantData = {
             _id: generatedUuid.toString(),
+            owner: player.data.name,
             data: {
                 time: 0,
                 type: '',
-                variety: '',
                 water: 0,
             },
             general: {
@@ -86,9 +87,38 @@ export class PlantController implements iPlant {
         await Database.updatePartialData(data._id, { plants: data.plants }, OSPlants.collection);
     }
 
+    // TODO: Remove Logs
+    public static async seedPlant(player: alt.Player, item: Item) {
+        const plant = await this.isPlayerInRangeOfPlant(player, 3);
+
+        ServerTextLabelController.remove(plant._id.toString());
+        ServerTextLabelController.append({
+            data: `~g~${item.data.type}~n~~n~Growing...~n~~n~~r~${item.data.time} minutes.`,
+            pos: plant.textLabel.position,
+            uid: plant._id.toString(),
+        });
+
+        plant.textLabel.data = `~g~${item.data.type}~n~~n~Growing...~n~~n~~r~${item.data.time} minutes.`;
+
+        this.updatePlant(plant);
+    }
+
+    public static async updatePlant(data: iPlantData) {
+        const updateDoc = await Database.fetchData<iPlant>('owner', data.owner, OSPlants.collection);
+        const index = updateDoc.plants.findIndex((x) => x._id === data._id);
+        updateDoc.plants[index] = data;
+        await Database.updatePartialData(
+            updateDoc._id,
+            {
+                plants: [updateDoc.plants[index]],
+            },
+            OSPlants.collection,
+        );
+    }
+
     public static async isPlayerInRangeOfPlant(player: alt.Player, range: number): Promise<iPlantData> {
         const playerPlantDocument = await Database.fetchAllData<iPlant>(OSPlants.collection);
-        let returnedData: iPlantData = null;
+        let returnedData: iPlantData;
         for (let x = 0; x < playerPlantDocument.length; x++) {
             const plantsForCheck = [...playerPlantDocument[x].plants];
             plantsForCheck.forEach((entry) => {

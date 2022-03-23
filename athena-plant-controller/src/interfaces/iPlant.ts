@@ -8,10 +8,10 @@ export default interface iPlant {
 
 export interface iPlantData {
     _id?: string;
+    owner: string,
     data: {
         water: number;
         type: string;
-        variety: string;
         time: number;
     };
     general: {

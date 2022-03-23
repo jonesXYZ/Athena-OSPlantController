@@ -17,8 +17,9 @@ import { PlantController } from './plant-controller';
 
 ItemEffects.add(TOOL_EVENTS.GROW_PLANT, async (player: alt.Player, item: Item, slot: number, type: INVENTORY_TYPE) => {
     const isToolbar = playerFuncs.inventory.isInToolbar(player, { name: item.name });
-    
-    if(!player.getMeta('Weedfield') === true && OSPlants.usePolygonSystem) {
+    const plantInRange = await PlantController.isPlayerInRangeOfPlant(player, 3);
+
+    if (!player.getMeta('Weedfield') === true && OSPlants.usePolygonSystem) {
         playerFuncs.emit.notification(player, 'You are not on a weedfield.');
         return;
     }
@@ -28,16 +29,15 @@ ItemEffects.add(TOOL_EVENTS.GROW_PLANT, async (player: alt.Player, item: Item, s
         return;
     }
 
-    if (await PlantController.isPlayerInRangeOfPlant(player, 3)) {
+    if (plantInRange) {
         playerFuncs.emit.notification(player, `Standing to close to another plant!`);
         return;
     }
 
-    const itemInBar = playerFuncs.inventory.isInToolbar(player, { name: item.name });
-    if (type === INVENTORY_TYPE.TOOLBAR && player.data.toolbar[itemInBar.index].quantity <= 1) {
-        playerFuncs.inventory.toolbarRemove(player, player.data.toolbar[itemInBar.index].slot);
+    if (type === INVENTORY_TYPE.TOOLBAR && player.data.toolbar[isToolbar.index].quantity <= 1) {
+        playerFuncs.inventory.toolbarRemove(player, player.data.toolbar[isToolbar.index].slot);
     } else {
-        player.data.toolbar[itemInBar.index].quantity--;
+        player.data.toolbar[isToolbar.index].quantity--;
     }
 
     playerFuncs.save.field(player, 'toolbar', player.data.toolbar);
@@ -46,8 +46,17 @@ ItemEffects.add(TOOL_EVENTS.GROW_PLANT, async (player: alt.Player, item: Item, s
     PlantController.growPlant(player, item.data.faction);
 });
 
+ItemEffects.add(TOOL_EVENTS.SEED_PLANT, async (player: alt.Player, item: Item, slot: number, type: INVENTORY_TYPE) => {
+    const isToolbar = playerFuncs.inventory.isInToolbar(player, { name: item.name });
+    const plantInRange = await PlantController.isPlayerInRangeOfPlant(player, 3);
+
+    PlantController.seedPlant(player, item);
+    alt.logError(JSON.stringify(item));
+});
+
 alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, async () => {
     const playerPlantDocument = await Database.fetchAllData<iPlant>(OSPlants.collection);
+    
     for (let x = 0; x < playerPlantDocument.length; x++) {
         let plantsToAdd = [...playerPlantDocument[x].plants];
         plantsToAdd.forEach((entry, index) => {
@@ -67,26 +76,26 @@ alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, async () => {
                 maxDistance: OSPlants.textLabelDistance,
             });
         });
+    }
 
-        for (let x = 0; x < fields.length; x++) {
-            const field = fields[x];
-            if (field.isBlip) {
-                ServerBlipController.append({
-                    sprite: 469,
-                    color: 2,
-                    pos: { x: field.x, y: field.y, z: field.z },
-                    scale: 1,
-                    shortRange: true,
-                    text: 'Weedfield',
-                });
-            }
+    for (let x = 0; x < fields.length; x++) {
+        const field = fields[x];
+        if (field.isBlip) {
+            ServerBlipController.append({
+                sprite: 469,
+                color: 2,
+                pos: { x: field.x, y: field.y, z: field.z },
+                scale: 1,
+                shortRange: true,
+                text: 'Weedfield',
+            });
+        }
 
-            if(OSPlants.usePolygonSystem) {
-                const polygon = new PolygonShape(field.z, field.z + 2.5, field.vertices, true, false);
-            
-                polygon.addEnterCallback(fieldEnter);
-                polygon.addLeaveCallback(fieldLeave);
-            }
+        if (OSPlants.usePolygonSystem) {
+            const polygon = new PolygonShape(field.z, field.z + 2.5, field.vertices, true, false);
+
+            polygon.addEnterCallback(fieldEnter);
+            polygon.addLeaveCallback(fieldLeave);
         }
     }
 });
