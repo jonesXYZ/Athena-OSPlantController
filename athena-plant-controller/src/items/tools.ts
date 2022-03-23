@@ -7,7 +7,12 @@ export const plantTools: Array<Item> = [
         name: 'Plant Pot',
         icon: 'crate',
         description: 'Used to grow some plants.',
-        behavior: ITEM_TYPE.CAN_DROP | ITEM_TYPE.CONSUMABLE | ITEM_TYPE.SKIP_CONSUMABLE | ITEM_TYPE.IS_TOOLBAR | ITEM_TYPE.CAN_STACK,
+        behavior:
+            ITEM_TYPE.CAN_DROP |
+            ITEM_TYPE.CONSUMABLE |
+            ITEM_TYPE.SKIP_CONSUMABLE |
+            ITEM_TYPE.IS_TOOLBAR |
+            ITEM_TYPE.CAN_STACK,
         data: {
             event: TOOL_EVENTS.GROW_PLANT,
             // faction: 'YourFaction' | Need to think about this further.
@@ -51,5 +56,5 @@ export const plantTools: Array<Item> = [
         quantity: 1,
         dbName: 'PlantController-Plantharvester',
         version: 1,
-    }
+    },
 ];

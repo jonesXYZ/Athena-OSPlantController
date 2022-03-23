@@ -13,7 +13,7 @@ export interface iPlantData {
         type: string;
         variety: string;
         time: number;
-    }
+    };
     general: {
         dimension: number;
         interior: string;
@@ -21,11 +21,11 @@ export interface iPlantData {
     };
     object: {
         model: string;
-    },
+    };
     textLabel: {
         data: string;
         position: Vector3;
-    }
+    };
     states: {
         isSeeds: boolean;
         isFertilized: boolean;

@@ -92,7 +92,7 @@ export class PlantController implements iPlant {
         for (let x = 0; x < playerPlantDocument.length; x++) {
             const plantsForCheck = [...playerPlantDocument[x].plants];
             plantsForCheck.forEach((entry) => {
-                if(player.pos.isInRange(entry.position, range)) {
+                if (player.pos.isInRange(entry.position, range)) {
                     returnedData = entry;
                 } else return null;
             });

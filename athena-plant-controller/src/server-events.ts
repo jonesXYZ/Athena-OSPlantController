@@ -1,10 +1,11 @@
 import Database from '@stuyk/ezmongodb';
 import * as alt from 'alt-server';
-import { OSPlants } from '..';
+import { OSPlants } from '../index';
 import { PolygonShape } from '../../../server/extensions/extColshape';
 import { playerFuncs } from '../../../server/extensions/extPlayer';
 import { ServerObjectController } from '../../../server/streamers/object';
 import { ServerTextLabelController } from '../../../server/streamers/textlabel';
+import { ServerBlipController } from '../../../server/systems/blip';
 import { ItemEffects } from '../../../server/systems/itemEffects';
 import { INVENTORY_TYPE } from '../../../shared/enums/inventoryTypes';
 import { SYSTEM_EVENTS } from '../../../shared/enums/system';
@@ -16,12 +17,18 @@ import { PlantController } from './plant-controller';
 
 ItemEffects.add(TOOL_EVENTS.GROW_PLANT, async (player: alt.Player, item: Item, slot: number, type: INVENTORY_TYPE) => {
     const isToolbar = playerFuncs.inventory.isInToolbar(player, { name: item.name });
+    
+    if(!player.getMeta('Weedfield') === true && OSPlants.usePolygonSystem) {
+        playerFuncs.emit.notification(player, 'You are not on a weedfield.');
+        return;
+    }
+
     if (!isToolbar) {
         playerFuncs.emit.notification(player, `Item should be in Toolbar.`);
         return;
     }
 
-    if(await PlantController.isPlayerInRangeOfPlant(player, 3)) {
+    if (await PlantController.isPlayerInRangeOfPlant(player, 3)) {
         playerFuncs.emit.notification(player, `Standing to close to another plant!`);
         return;
     }
@@ -61,27 +68,41 @@ alt.on(SYSTEM_EVENTS.BOOTUP_ENABLE_ENTRY, async () => {
             });
         });
 
-        for(let x = 0; x < fields.length; x++) {
-            const position = fields[x];
-            const polygon = new PolygonShape(position.z, position.z + 2.5, fields[x].vertices, true, false);
-            polygon.addEnterCallback((enter));
-            polygon.addLeaveCallback((leave));
+        for (let x = 0; x < fields.length; x++) {
+            const field = fields[x];
+            if (field.isBlip) {
+                ServerBlipController.append({
+                    sprite: 469,
+                    color: 2,
+                    pos: { x: field.x, y: field.y, z: field.z },
+                    scale: 1,
+                    shortRange: true,
+                    text: 'Weedfield',
+                });
+            }
+
+            if(OSPlants.usePolygonSystem) {
+                const polygon = new PolygonShape(field.z, field.z + 2.5, field.vertices, true, false);
+            
+                polygon.addEnterCallback(fieldEnter);
+                polygon.addLeaveCallback(fieldLeave);
+            }
         }
     }
 });
 
-function  enter(polygon: PolygonShape, player: alt.Player) {
+function fieldEnter(polygon: PolygonShape, player: alt.Player) {
     if (!(player instanceof alt.Player)) {
         return;
     }
-
     playerFuncs.emit.notification(player, `Welcome to the Weed Field! Feel free to grow your plants.`);
+    player.setMeta('Weedfield', true);
 }
 
-function leave(polygon: PolygonShape, player: alt.Player) {
-    if(!(player instanceof alt.Player)) {
+function fieldLeave(polygon: PolygonShape, player: alt.Player) {
+    if (!(player instanceof alt.Player)) {
         return;
     }
-
     playerFuncs.emit.notification(player, `You've left the weed field.`);
+    player.setMeta('Weedfield', false);
 }

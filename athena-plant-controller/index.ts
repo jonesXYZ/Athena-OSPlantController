@@ -16,6 +16,7 @@ export const OSPlants = {
     objectDistance: 5,
     everyoneCanInteract: false,
     plantsPerPlayer: -1, // Place whatever you want
+    usePolygonSystem: true,
 };
 
 PluginSystem.registerPlugin(OSPlants.name, async () => {
